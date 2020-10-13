@@ -1,0 +1,20 @@
+/* @tailwind base;
+
+@tailwind components;
+
+@tailwind utilities; */
+
+body {
+  margin: 25px;
+}
+
+section {
+  padding: 25px;
+  margin-bottom: 25px;
+  border: 1px solid #ccc;
+}
+
+.db-table {
+  padding: 25px;
+  margin-top: 20px;
+}
