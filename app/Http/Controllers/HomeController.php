@@ -33,7 +33,8 @@ class HomeController extends Controller
 
         return view('index')->with([
             'database' => $loadDatabaseTables->results,
-            'resources' => $this->resources
+            'resources' => $this->resources,
+            'allowedOrigins' => config('cors.allowed_origins')
         ]);
     }
 }

@@ -15,11 +15,12 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'login', 'logout'],
+    'paths' => ['*'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    # List of outside URLs that can access this API
+    'allowed_origins' => explode(',', env('CORS_ALLOWED_ORIGINS')),
 
     'allowed_origins_patterns' => [],
 

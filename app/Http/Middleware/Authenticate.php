@@ -7,16 +7,15 @@ use Illuminate\Auth\Middleware\Authenticate as Middleware;
 class Authenticate extends Middleware
 {
     /**
-     * Handle an unauthenticated user.
+     * Get the path the user should be redirected to when they are not authenticated.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  array  $guards
-     * @return void
-     *
-     * @throws \Illuminate\Auth\AuthenticationException
+     * @return string|null
      */
-    protected function unauthenticated($request, array $guards)
+    protected function redirectTo($request)
     {
-        echo 'Access denied';
+        if (! $request->expectsJson()) {
+            return route('login');
+        }
     }
 }
