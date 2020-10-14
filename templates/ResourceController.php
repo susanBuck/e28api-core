@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\GeneratedControllers;
 
 use App\Models\GeneratedModels\Resource;
+
 use Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +13,7 @@ class ResourceController extends \App\Http\Controllers\Controller
     private $fields = [];
 
     /**
-     * GET /api/resource
+     * GET /resource
      */
     public function index()
     {
@@ -20,13 +21,17 @@ class ResourceController extends \App\Http\Controllers\Controller
     }
 
     /**
-    * GET /api/resource/{id}
+    * GET /resource/{id}
     */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $resource = Resource::where('id', $id)->first();
 
-        if (!$resource) {
+        if (!isset($request->user()->id) or ($resource->userRestricted and $resource->user_id != $request->user()->id)) {
+            return response([
+            'error' => ['Access denied']
+        ], 200);
+        } elseif (!$resource) {
             return response([
             'error' => ['Resource not found']
         ], 404);
@@ -36,7 +41,7 @@ class ResourceController extends \App\Http\Controllers\Controller
     }
 
     /**
-    * POST /api/resource
+    * POST /resource
     */
     public function store(Request $request)
     {
@@ -58,7 +63,7 @@ class ResourceController extends \App\Http\Controllers\Controller
     }
 
     /**
-    * DELETE /api/resource/{id}
+    * DELETE /resource/{id}
     */
     public function destroy(Request $request, $id)
     {
@@ -74,7 +79,7 @@ class ResourceController extends \App\Http\Controllers\Controller
     }
 
     /**
-    * PUT /api/resource/{id}
+    * PUT /resource/{id}
     */
     public function update(Request $request, $id)
     {
@@ -105,7 +110,7 @@ class ResourceController extends \App\Http\Controllers\Controller
     }
 
     /**
-    * GET /api/resource/query?key=value
+    * GET /resource/query?key=value
     */
     public function query(Request $request)
     {

@@ -35,6 +35,9 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+        // Delete any existing tokens this user may have
+        $user->tokens()->delete();
+
         if (!$user || !Hash::check($request->password, $user->password)) {
             $response = [
                 'success' => false,
@@ -68,7 +71,7 @@ class AuthController extends Controller
             return response([
             'message' => ['Registration failed'],
             'errors' => $validator->errors()
-        ], 409); # 409 Conflict
+        ], 200);
         }
 
         $user = User::create([
@@ -77,7 +80,7 @@ class AuthController extends Controller
             'password' => \Hash::make($request->password)
         ]);
        
-        $token = $user->createToken('my-app-token')->plainTextToken;
+        $token = $user->createToken(config('app.name'))->plainTextToken;
 
         $response = [
             'user' => $user,

@@ -51,7 +51,7 @@
 
                 <td><code>GET</code></td>
                 <td><code>/{{ $resourceName }}</code></td>
-                <td>Show all {{ $resourceName }}</td>
+                <td>Show all {{ Str::plural($resourceName) }}</td>
             </tr>
             <tr>
                 <td><code>GET</code></td>
