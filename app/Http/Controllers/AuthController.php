@@ -28,28 +28,43 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $data = $request->validate([
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        if ($validator->fails()) {
+            return response([
+            'message' => ['Login failed'],
+            'errors' => $validator->errors()->all()
+            ], 200);
+        }
 
-        // Delete any existing tokens this user may have
-        $user->tokens()->delete();
+        $authed = Auth::attempt([
+            'email' => $request->email,
+            'password' => $request->password
+        ]);
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            $response = [
-                'success' => false,
-                'errors' => ['These credentials do not match our records']
-            ];
-        } else {
+        if ($authed) {
+            $user = User::where('email', $request->email)->first();
+
+            // Delete any existing tokens this user may have
+            $user->tokens()->delete();
+
+            // Create them a new token
             $token = $user->createToken(config('app.name'))->plainTextToken;
 
             $response = [
                 'success' => true,
                 'user' => $user,
                 'token' => $token
+            ];
+        } else {
+            $response = [
+                'success' => false,
+                'message' => 'Login failed',
+                'errors' => ['These credentials do not match our records'],
+                'test' => 'login-failed-bad-credentials'
             ];
         }
 
@@ -69,8 +84,9 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             return response([
-            'message' => ['Registration failed'],
-            'errors' => $validator->errors()
+            'success' => false,
+            'errors' => $validator->errors()->all(),
+            'test' => 'registration-failed'
         ], 200);
         }
 
@@ -83,6 +99,7 @@ class AuthController extends Controller
         $token = $user->createToken(config('app.name'))->plainTextToken;
 
         $response = [
+            'success' => true,
             'user' => $user,
             'token' => $token
         ];

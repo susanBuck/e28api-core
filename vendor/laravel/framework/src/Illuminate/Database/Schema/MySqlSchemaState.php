@@ -2,6 +2,10 @@
 
 namespace Illuminate\Database\Schema;
 
+use Exception;
+use Illuminate\Support\Str;
+use Symfony\Component\Process\Process;
+
 class MySqlSchemaState extends SchemaState
 {
     /**
@@ -12,9 +16,9 @@ class MySqlSchemaState extends SchemaState
      */
     public function dump($path)
     {
-        $this->makeProcess(
-            $this->baseDumpCommand().' --routines --result-file=$LARAVEL_LOAD_PATH --no-data'
-        )->mustRun($this->output, array_merge($this->baseVariables($this->connection->getConfig()), [
+        $this->executeDumpProcess($this->makeProcess(
+            $this->baseDumpCommand().' --routines --result-file="${:LARAVEL_LOAD_PATH}" --no-data'
+        ), $this->output, array_merge($this->baseVariables($this->connection->getConfig()), [
             'LARAVEL_LOAD_PATH' => $path,
         ]));
 
@@ -46,9 +50,9 @@ class MySqlSchemaState extends SchemaState
      */
     protected function appendMigrationData(string $path)
     {
-        with($process = $this->makeProcess(
+        $process = $this->executeDumpProcess($this->makeProcess(
             $this->baseDumpCommand().' migrations --no-create-info --skip-extended-insert --skip-routines --compact'
-        ))->mustRun(null, array_merge($this->baseVariables($this->connection->getConfig()), [
+        ), null, array_merge($this->baseVariables($this->connection->getConfig()), [
             //
         ]));
 
@@ -63,7 +67,7 @@ class MySqlSchemaState extends SchemaState
      */
     public function load($path)
     {
-        $process = $this->makeProcess('mysql --host=$LARAVEL_LOAD_HOST --port=$LARAVEL_LOAD_PORT --user=$LARAVEL_LOAD_USER --password=$LARAVEL_LOAD_PASSWORD --database=$LARAVEL_LOAD_DATABASE < $LARAVEL_LOAD_PATH');
+        $process = $this->makeProcess('mysql --host="${:LARAVEL_LOAD_HOST}" --port="${:LARAVEL_LOAD_PORT}" --user="${:LARAVEL_LOAD_USER}" --password="${:LARAVEL_LOAD_PASSWORD}" --database="${:LARAVEL_LOAD_DATABASE}" < "${:LARAVEL_LOAD_PATH}"');
 
         $process->mustRun(null, array_merge($this->baseVariables($this->connection->getConfig()), [
             'LARAVEL_LOAD_PATH' => $path,
@@ -77,9 +81,11 @@ class MySqlSchemaState extends SchemaState
      */
     protected function baseDumpCommand()
     {
+        $columnStatistics = $this->connection->isMaria() ? '' : '--column-statistics=0';
+
         $gtidPurged = $this->connection->isMaria() ? '' : '--set-gtid-purged=OFF';
 
-        return 'mysqldump '.$gtidPurged.' --column-statistics=0 --skip-add-drop-table --skip-add-locks --skip-comments --skip-set-charset --tz-utc --host=$LARAVEL_LOAD_HOST --port=$LARAVEL_LOAD_PORT --user=$LARAVEL_LOAD_USER --password=$LARAVEL_LOAD_PASSWORD $LARAVEL_LOAD_DATABASE';
+        return 'mysqldump '.$gtidPurged.' '.$columnStatistics.' --skip-add-drop-table --skip-add-locks --skip-comments --skip-set-charset --tz-utc --host="${:LARAVEL_LOAD_HOST}" --port="${:LARAVEL_LOAD_PORT}" --user="${:LARAVEL_LOAD_USER}" --password="${:LARAVEL_LOAD_PASSWORD}" "${:LARAVEL_LOAD_DATABASE}"';
     }
 
     /**
@@ -91,11 +97,36 @@ class MySqlSchemaState extends SchemaState
     protected function baseVariables(array $config)
     {
         return [
-            'LARAVEL_LOAD_HOST' => $config['host'],
+            'LARAVEL_LOAD_HOST' => is_array($config['host']) ? $config['host'][0] : $config['host'],
             'LARAVEL_LOAD_PORT' => $config['port'],
             'LARAVEL_LOAD_USER' => $config['username'],
             'LARAVEL_LOAD_PASSWORD' => $config['password'],
             'LARAVEL_LOAD_DATABASE' => $config['database'],
         ];
+    }
+
+    /**
+     * Execute the given dump process.
+     *
+     * @param  \Symfony\Component\Process\Process  $process
+     * @param  callable  $output
+     * @param  array  $variables
+     * @return \Symfony\Component\Process\Process
+     */
+    protected function executeDumpProcess(Process $process, $output, array $variables)
+    {
+        try {
+            $process->setTimeout(null)->mustRun($output, $variables);
+        } catch (Exception $e) {
+            if (Str::contains($e->getMessage(), ['column-statistics', 'column_statistics'])) {
+                return $this->executeDumpProcess(Process::fromShellCommandLine(
+                    str_replace(' --column-statistics=0', '', $process->getCommandLine())
+                ), $output, $variables);
+            }
+
+            throw $e;
+        }
+
+        return $process;
     }
 }

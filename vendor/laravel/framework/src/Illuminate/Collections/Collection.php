@@ -512,7 +512,7 @@ class Collection implements ArrayAccess, Enumerable
     {
         $first = $this->first();
 
-        if (is_array($first) || is_object($first)) {
+        if (is_array($first) || (is_object($first) && ! $first instanceof Stringable)) {
             return implode($glue, $this->pluck($value)->all());
         }
 
@@ -608,7 +608,7 @@ class Collection implements ArrayAccess, Enumerable
     /**
      * Get the values of a given key.
      *
-     * @param  string|array  $value
+     * @param  string|array|int|null  $value
      * @param  string|null  $key
      * @return static
      */

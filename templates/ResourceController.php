@@ -7,6 +7,7 @@ use App\Models\GeneratedModels\Resource;
 use Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\GeneratedRequests\ResourceRequest;
 
 class ResourceController extends \App\Http\Controllers\Controller
 {
@@ -15,9 +16,21 @@ class ResourceController extends \App\Http\Controllers\Controller
     /**
      * GET /resource
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Resource::all();
+        $resource = new Resource();
+        $query = $resource->query();
+
+        # Limit query to only resources beloning to the currently logged in user
+        if ($resource->userRestricted) {
+            $query = $query->where('user_id', $request->user()->id);
+        }
+
+        return response([
+            'success' => true,
+            'errors' => null,
+            'resource' => $query->get(),
+        ], 200);
     }
 
     /**
@@ -27,39 +40,47 @@ class ResourceController extends \App\Http\Controllers\Controller
     {
         $resource = Resource::where('id', $id)->first();
 
-        if (!isset($request->user()->id) or ($resource->userRestricted and $resource->user_id != $request->user()->id)) {
+        if (!$resource) {
             return response([
-            'error' => ['Access denied']
-        ], 200);
-        } elseif (!$resource) {
-            return response([
-            'error' => ['Resource not found']
-        ], 404);
-        } else {
-            return response($resource->toArray(), 200); # 200 Ok
+                'success' => false,
+                'errors' => ['Resource not found'],
+                'test' => 'resource-not-found'
+            ], 200);
         }
+
+        if ($resource->userRestricted and $resource->user_id != $request->user()->id) {
+            return response([
+                'success' => false,
+                'errors' => ['Data access denied'],
+                'test' => 'data-access-denied'
+            ], 200);
+        }
+        
+        return response([
+            'success' => true,
+            'errors' => null,
+            'resource' => $resource->toArray()
+        ], 200);
     }
 
     /**
     * POST /resource
     */
-    public function store(Request $request)
+    public function store(ResourceRequest $request)
     {
-        $data = $request->only(array_keys($this->fields));
-
-        $validator = Validator::make($request->all(), $this->fields);
-
-        if ($validator->fails()) {
-            return response(['error' => $validator->errors()], 400); # Bad request
-        }
-
         $resource = new Resource();
+
         foreach ($this->fields as $fieldName => $rule) {
-            $resource->$fieldName = $data[$fieldName];
+            $resource->$fieldName = $request->$fieldName;
         }
         $resource->save();
 
-        return response($data, 201); # 201 Resource created
+        return response([
+            'success' => true,
+            'errors' => null,
+            'test' => 'resource-created',
+            'resource' => $resource
+            ], 201); # 201 Resource created
     }
 
     /**
@@ -68,14 +89,29 @@ class ResourceController extends \App\Http\Controllers\Controller
     public function destroy(Request $request, $id)
     {
         $resource = Resource::find($id);
-        
+
         if (!$resource) {
-            return response(['error' => 'Resource ' . $id . ' not found'], 400);
+            return response([
+                'success' => false,
+                'test' => 'resource-not-found',
+                'errors' => ['Resource ' . $id . ' not found']
+            ], 200);
         }
- 
+
+        if ($resource->userRestricted and $resource->user_id != $request->user()->id) {
+            return response([
+                'success' => false,
+                'errors' => ['Data access denied'],
+                'test' => 'data-access-denied'
+            ], 200);
+        }
+
         $resource->delete();
 
-        return response(['success' => 'Deleted resource '.$id], 200); # 200 Ok
+        return response([
+            'success' => true,
+            'errors' => null,
+        ], 200);
     }
 
     /**
@@ -83,30 +119,34 @@ class ResourceController extends \App\Http\Controllers\Controller
     */
     public function update(Request $request, $id)
     {
-        $id = $request->id;
         $resource = Resource::find($id);
-        
+
         if (!$resource) {
-            return response(['error' => 'Resource ' . $id . ' not found'], 400);
+            return response([
+                'success' => false,
+                'test' => 'update-failed-because-resource-not-found',
+                'errors' => ['Resource ' . $id . ' not found']
+            ], 200);
         }
 
-        $data = $request->only(array_keys($this->fields));
-        $validator = Validator::make($request->all(), $this->fields);
+        # Executing Form Request validation manually so we can do the check above
+        # to make sure the resource exists before validating
+        # otherwise, it throws an error when checking unique fields
+        app('App\Http\Requests\GeneratedRequests\ResourceRequest');
 
-        if ($validator->fails()) {
-            return response(['error' => $validator->errors()], 400); # Bad request
-        }
-
-        $resource = new Resource();
+        # Do update
         foreach ($this->fields as $fieldName => $rule) {
-            $resource->$fieldName = $data[$fieldName];
+            $resource->$fieldName = $request->$fieldName;
         }
         $resource->save();
 
         return response([
-            'success' => 'Updated resource ' . $id,
+            'success' => true,
+            'errors' => null,
+            'test' => 'update-completed',
+            'message' => 'Updated resource ' . $id,
             'resource' => $resource->toArray()
-        ], 200); # 200 Ok
+        ], 200);
     }
 
     /**
@@ -118,8 +158,14 @@ class ResourceController extends \App\Http\Controllers\Controller
 
         $queries = $request->all();
 
-        $query = Resource::query();
+        $resource = new Resource();
 
+        $query = $resource->query();
+        
+        if ($resource->userRestricted) {
+            $query = $query->where('user_id', $request->user()->id);
+        }
+        
         foreach ($queries as $key => $value) {
             $query = $query->where($key, $value);
         }
@@ -129,7 +175,6 @@ class ResourceController extends \App\Http\Controllers\Controller
         $query = DB::getQueryLog();
 
         return response([
-            'query' => $query,
             'results' => $results
         ], 200); # 200 Ok
     }

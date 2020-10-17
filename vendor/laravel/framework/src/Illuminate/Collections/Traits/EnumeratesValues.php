@@ -44,7 +44,7 @@ trait EnumeratesValues
     /**
      * The methods that can be proxied.
      *
-     * @var array
+     * @var string[]
      */
     protected static $proxies = [
         'average',
@@ -686,6 +686,17 @@ trait EnumeratesValues
     public function pipe(callable $callback)
     {
         return $callback($this);
+    }
+
+    /**
+     * Pass the collection into a new class.
+     *
+     * @param  string  $class
+     * @return mixed
+     */
+    public function pipeInto($class)
+    {
+        return new $class($this);
     }
 
     /**

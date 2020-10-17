@@ -80,7 +80,7 @@ class Handler implements ExceptionHandlerContract
     /**
      * A list of the internal exception types that should not be reported.
      *
-     * @var array
+     * @var string[]
      */
     protected $internalDontReport = [
         AuthenticationException::class,
@@ -96,7 +96,7 @@ class Handler implements ExceptionHandlerContract
     /**
      * A list of the inputs that are never flashed for validation exceptions.
      *
-     * @var array
+     * @var string[]
      */
     protected $dontFlash = [
         'password',
@@ -314,7 +314,7 @@ class Handler implements ExceptionHandlerContract
 
         foreach ($this->renderCallbacks as $renderCallback) {
             if (is_a($e, $this->firstClosureParameterType($renderCallback))) {
-                $response = $renderCallback($e);
+                $response = $renderCallback($e, $request);
 
                 if (! is_null($response)) {
                     return $response;

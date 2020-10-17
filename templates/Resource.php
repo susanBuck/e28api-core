@@ -9,4 +9,6 @@ use Illuminate\Support\Facades\Schema;
 class Resource extends Model
 {
     use HasFactory;
+
+    # properties
 }

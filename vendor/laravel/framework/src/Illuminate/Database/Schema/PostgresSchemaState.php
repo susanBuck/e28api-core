@@ -31,7 +31,7 @@ class PostgresSchemaState extends SchemaState
     {
         with($process = $this->makeProcess(
             $this->baseDumpCommand().' --table=migrations --data-only --inserts'
-        ))->mustRun(null, array_merge($this->baseVariables($this->connection->getConfig()), [
+        ))->setTimeout(null)->mustRun(null, array_merge($this->baseVariables($this->connection->getConfig()), [
             //
         ]));
 
@@ -51,7 +51,13 @@ class PostgresSchemaState extends SchemaState
      */
     public function load($path)
     {
-        $process = $this->makeProcess('PGPASSWORD=$LARAVEL_LOAD_PASSWORD psql --file=$LARAVEL_LOAD_PATH --host=$LARAVEL_LOAD_HOST --port=$LARAVEL_LOAD_PORT --username=$LARAVEL_LOAD_USER --dbname=$LARAVEL_LOAD_DATABASE');
+        $command = 'PGPASSWORD=$LARAVEL_LOAD_PASSWORD pg_restore --host=$LARAVEL_LOAD_HOST --port=$LARAVEL_LOAD_PORT --username=$LARAVEL_LOAD_USER --dbname=$LARAVEL_LOAD_DATABASE $LARAVEL_LOAD_PATH';
+
+        if (preg_match('/\.sql$/', $path) !== false) {
+            $command = 'PGPASSWORD=$LARAVEL_LOAD_PASSWORD psql --file=$LARAVEL_LOAD_PATH --host=$LARAVEL_LOAD_HOST --port=$LARAVEL_LOAD_PORT --username=$LARAVEL_LOAD_USER --dbname=$LARAVEL_LOAD_DATABASE';
+        }
+
+        $process = $this->makeProcess($command);
 
         $process->mustRun(null, array_merge($this->baseVariables($this->connection->getConfig()), [
             'LARAVEL_LOAD_PATH' => $path,
@@ -59,13 +65,13 @@ class PostgresSchemaState extends SchemaState
     }
 
     /**
-     * Get the base dump command arguments for MySQL as a string.
+     * Get the base dump command arguments for PostgreSQL as a string.
      *
      * @return string
      */
     protected function baseDumpCommand()
     {
-        return 'PGPASSWORD=$LARAVEL_LOAD_PASSWORD pg_dump --host=$LARAVEL_LOAD_HOST --port=$LARAVEL_LOAD_PORT --username=$LARAVEL_LOAD_USER $LARAVEL_LOAD_DATABASE';
+        return 'PGPASSWORD=$LARAVEL_LOAD_PASSWORD pg_dump --no-owner --no-acl -Fc --host=$LARAVEL_LOAD_HOST --port=$LARAVEL_LOAD_PORT --username=$LARAVEL_LOAD_USER $LARAVEL_LOAD_DATABASE';
     }
 
     /**

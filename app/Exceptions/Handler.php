@@ -3,6 +3,9 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\ValidationException;
+
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException as AccessDeniedHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -32,6 +35,12 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        //
+        $this->renderable(function (AccessDeniedHttpException $e, $request) {
+            return response()->json([
+                'success' => false,
+                'test' => 'action-unauthorized',
+                'errors' => ['Action unauthorized']
+        ], 401);
+        });
     }
 }

@@ -16,6 +16,7 @@ class BuildApi
     private $resourceName;
     private $resourceNameLower;
     private $resourceNameStudly;
+    private $fields;
 
     /**
      *
@@ -27,15 +28,17 @@ class BuildApi
         $this->clearMigrationFiles();
         
         foreach ($resources as $resourceName => $fields) {
+            $this->fields = $fields;
             $this->resourceName = $resourceName;
             $this->resourceNameStudly = Str::studly($resourceName);
             $this->resourceNameLower = Str::lower($resourceName);
             $this->resourceNameLowerPlural = Str::plural(Str::lower($resourceName));
 
             if ($this->resourceName != 'user') {
-                $this->createMigration($fields);
+                $this->createMigration();
                 $this->createModel();
-                $this->createController($fields);
+                $this->createController();
+                $this->createRequest();
                 $this->addRoutes();
                 $this->runMigration('9999_99_99_999999_create_'.$this->resourceNameLower.'_table.php');
             } else {
@@ -48,6 +51,41 @@ class BuildApi
         }
 
         $this->writeRoutes();
+    }
+
+    /**
+     *
+     */
+    private function createRequest()
+    {
+        $template = File::get(base_path('templates/ResourceRequest.php'));
+       
+        $rules = "return [\n";
+        foreach ($this->fields as $fieldName => $details) {
+            $rules .= "'$fieldName' => [";
+
+            foreach ($details->validators as $validator) {
+                if (strstr($validator, 'unique')) {
+                    //'slug' => ['required', 'min:3', 'unique:products,slug,'.$this->route("id")],
+
+
+                    //$rules .= 'Rule::unique("'.$this->resourceNameLowerPlural.'", "slug")->ignore($this->request->get("slug"))';
+                    $rules .= '"'.$validator.',".$this->route("id")';
+                } else {
+                    $rules .= "'$validator', ";
+                }
+            }
+            $rules .= "],\n";
+        }
+        $rules .= "];";
+        
+
+        $template = str_replace('# rules #', $rules, $template);
+
+        $template = str_replace('Resource', $this->resourceNameStudly, $template);
+        $template = str_replace('resource', $this->resourceNameLower, $template);
+
+        File::put(app_path('Http/Requests/GeneratedRequests/' . $this->resourceNameStudly . 'Request.php'), $template);
     }
 
     /**
@@ -119,6 +157,13 @@ class BuildApi
         $template = File::get(base_path('templates/Resource.php'));
         $template = str_replace('Resource', $this->resourceNameStudly, $template);
         $template = str_replace('resource', $this->resourceNameLower, $template);
+
+        if (isset($this->fields->user_id)) {
+            $template = str_replace('# properties', 'public $userRestricted = true;', $template);
+        } else {
+            $template = str_replace('# properties', 'public $userRestricted = false;', $template);
+        }
+        
         File::put(app_path('Models/GeneratedModels/' . $this->resourceNameStudly . '.php'), $template);
     }
     
@@ -130,6 +175,12 @@ class BuildApi
         $routes = File::get(base_path('templates/routes.php'));
         $routes = str_replace('Resource', $this->resourceNameStudly, $routes);
         $routes = str_replace('resource', $this->resourceNameLower, $routes);
+
+        if (isset($this->fields->user_id)) {
+            $routes = str_replace('# middleware #', 'middleware("auth:sanctum")->', $routes);
+        } else {
+            $routes = str_replace('# middleware #', '', $routes);
+        }
 
         $this->routes .= $routes;
     }
@@ -146,7 +197,7 @@ class BuildApi
     /**
      *
      */
-    private function createController($fields)
+    private function createController()
     {
         // Controller
         $template = File::get(base_path('templates/ResourceController.php'));
@@ -154,7 +205,7 @@ class BuildApi
         $template = str_replace('resource', $this->resourceNameLower, $template);
 
         $fieldsDeclaration = 'private $fields = [';
-        foreach ($fields as $field => $details) {
+        foreach ($this->fields as $field => $details) {
             $fieldsDeclaration .= '"'.$field.'" => [';
             foreach ($details->validators as $validator) {
                 $fieldsDeclaration .= '"'.$validator.'",';
@@ -186,7 +237,7 @@ class BuildApi
     /**
      *
      */
-    private function createMigration($fields)
+    private function createMigration()
     {
         # Create migration file for this resource
         $template = File::get(base_path('templates/migration.php'));
@@ -195,7 +246,7 @@ class BuildApi
 
         $schema = '';
 
-        foreach ($fields as $field => $fieldDetails) {
+        foreach ($this->fields as $field => $fieldDetails) {
             $schema .= "\$table->" . $fieldDetails->type . "('" . $field ."'); \n";
         }
 
