@@ -11,7 +11,12 @@ npm-debug.log
 yarn-error.log
 .env
 
-app/Http/Requests/GeneratedRequests
 routes/generated-routes.php
 database/migrations/9999*
 
+# Note: the following directories have their own .gitignore file 
+# so that we can include the directory, but not its contents in the repository.
+# * /app/Models/GeneratedModels
+# * /app/Http/Controllers/GeneratedControllers
+# * /app/Http/Requests/GeneratedRequests
+# * /database/factories/GeneratedModels
