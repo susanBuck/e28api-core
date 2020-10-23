@@ -10,5 +10,7 @@ class Resource extends Model
 {
     use HasFactory;
 
-    # properties
+    protected $table = '# table name #';
+
+    # properties #
 }

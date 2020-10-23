@@ -1,20 +1,33 @@
 @extends('master')
 
 @section('body')
+
+<h1>API</h1>
+
 <section>
-    <h2>API</h2>
+    <h2>Allowed origins</h2>
 
-    <strong>Allowed origins</strong>
-    (<small>Configure via <code>/core/.env</code></small>)
+    @if($allowedOrigins[0] == '*')
+    <code>PUBLIC: Any site can use this API</code>
 
+
+    @else
+    This API will only respond to requests from these domains:
     <ul>
         @foreach($allowedOrigins as $origin)
         <li><code>{{ $origin }}</code></li>
         @endforeach
     </ul>
+    @endif
 
+    <p>(<small>Configure via <code>/core/.env</code></small>)</p>
 
+</section>
 
+<section>
+    <h2>Routes</h2>
+
+    <small>🔒 = User restricted route</small>
 
     <table class='table table-light table-striped table-bordered table-sm'>
         <thead class='thead-dark'>
@@ -39,49 +52,56 @@
             <td><code>/register</code></td>
             <td>Register a new user (<code>name</code>, <code>email</code>, <code>password</code>)</td>
         </tr>
+
+
+        @foreach($resources as $resourceName => $fields)
+        <tr>
+            <td><code>GET</code></td>
+            <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}</code></td>
+
+            <td>Show all {{ Str::plural($resourceName) }}</td>
+
+        </tr>
+        <tr>
+            <td><code>GET</code></td>
+            <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/{id}</code></td>
+
+            <td>Show an individual {{ $resourceName }}</td>
+
+
+        </tr>
         <tr>
             <td><code>POST</code></td>
-            <td><code>/auth</code></td>
-            <td>Authorize and get details of currently logged in user</td>
+            <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}</code></td>
+
+            <td>Store a new {{ $resourceName }}</td>
+
+
+        </tr>
+        <tr>
+            <td><code>PUT</code></td>
+            <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/{id}</code></td>
+
+            <td>Update an existing {{ $resourceName }}</td>
+
+
+        </tr>
+        <tr>
+            <td><code>DELETE</code></td>
+            <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/{id}</code></td>
+
+            <td>Delete an existing {{ $resourceName }}</td>
+        </tr>
+        <tr>
+            <td><code>GET</code></td>
+            <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/query?key=value&key=value</code></td>
+            <td>Query a {{ $resourceName }}</td>
         </tr>
 
-        <tbody>
-            @foreach($resources as $resourceName => $fields)
-            <tr>
-
-                <td><code>GET</code></td>
-                <td><code>/{{ $resourceName }}</code></td>
-                <td>Show all {{ Str::plural($resourceName) }}</td>
-            </tr>
-            <tr>
-                <td><code>GET</code></td>
-                <td><code>/{{ $resourceName }}/{id}</code></td>
-                <td>Show an individual {{ $resourceName }}</td>
-            </tr>
-            <tr>
-                <td><code>POST</code></td>
-                <td><code>/{{ $resourceName }}</code></td>
-                <td>Store a new {{ $resourceName }}</td>
-            </tr>
-            <tr>
-                <td><code>PUT</code></td>
-                <td><code>/{{ $resourceName }}/{id}</code></td>
-                <td>Update an existing {{ $resourceName }}</td>
-            </tr>
-            <tr>
-                <td><code>DELETE</code></td>
-                <td><code>/{{ $resourceName }}/{id}</code></td>
-                <td>Delete an existing {{ $resourceName }}</td>
-            </tr>
-            <tr>
-                <td><code>GET</code></td>
-                <td><code>/{{ $resourceName }}/query?key=value&key=value</code></td>
-                <td>Query a {{ $resourceName }}</td>
-            </tr>
-
-            @endforeach
+        @endforeach
         </tbody>
     </table>
+
 </section>
 
 <section>

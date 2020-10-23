@@ -5,8 +5,8 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use App\Models\GeneratedModels\Product;
-use App\Models\GeneratedModels\Favorite;
+use App\Models\GeneratedModels\product;
+use App\Models\GeneratedModels\favorite;
 use App\Models\User;
 
 class Resourcetest extends TestCase
@@ -15,12 +15,12 @@ class Resourcetest extends TestCase
     use RefreshDatabase;
 
     /**
-     *
+     * @group focus
      */
     public function testGetProduct()
     {
         $product = Product::factory()->create();
-        $r = $this->get('/product/'.$product->id);
+        $r = $this->get('/product/' . $product->id);
 
         $r->assertJsonPath('success', true);
         $r->assertJsonPath('product.slug', $product->slug);
@@ -56,7 +56,6 @@ class Resourcetest extends TestCase
     public function testGetAllProductsWhenThereAreNoProducts()
     {
         $r = $this->get('/product');
-        $r->dump();
         $r->assertJsonPath('success', true);
         $r->assertJsonCount(0, 'product');
     }
@@ -125,7 +124,7 @@ class Resourcetest extends TestCase
 
 
     /**
-     * @group focus
+     *
      */
     public function testUpdatingProductThatDoesNotExist()
     {

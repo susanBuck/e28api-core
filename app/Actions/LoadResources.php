@@ -11,35 +11,52 @@ use Hash;
 
 class LoadResources
 {
-    public $results;
-    private $routes;
-    private $resourceName;
-    private $resourceNameLower;
-    private $resourceNameStudly;
-
+    public $errors = [];
+    public $resources;
+ 
     /**
      *
      */
     public function __construct()
     {
-        $resourceFiles = File::allFiles(base_path('../resources/'));
+        # Initialize resources as an empty object
+        $this->resources = new stdClass();
 
-        $this->resources =  new \stdClass();
+        # Load resources.json file
+        $resourcesJson = File::get(base_path('../resources.json'));
+        if (!$resourcesJson) {
+            $this->errors[] = "Resource file not found at " . base_path('../resources.json');
+            return;
+        }
 
-        foreach ($resourceFiles as $file) {
-            $file = pathinfo($file);
-            
-            $resourcePath = $file['dirname'] . '/' . $file['basename'];
-            
-            $resourceText = File::get($resourcePath);
-            
-            $resourceObj = json_decode($resourceText);
-            
-            if ($resourceObj) {
-                foreach ($resourceObj as $resourceName => $values) {
-                    $this->resources->$resourceName = $values;
-                    break;
+        # Load JSON from file
+        $resources = json_decode($resourcesJson);
+        if (!$resources) {
+            $this->errors[] = "Resource file $resourcePath is not valid JSON";
+            return;
+        }
+
+        foreach ($resources as $resourceName => $fields) {
+            $resourceErrors = [];
+
+            if (!ctype_alpha($resourceName)) {
+                $resourceErrors[] = "Resource name `$resourceName` is invalid; must only contain letters";
+            }
+
+            foreach ($fields as $field => $value) {
+                if (!property_exists($value, 'type')) {
+                    $resourceErrors[] = "Resource `$resourceName`, field `$field` missing *type*";
                 }
+
+                if (!property_exists($value, 'validators')) {
+                    $resourceErrors[] = "Resource `$resourceName`, field `$field` missing *validators*";
+                }
+            }
+            
+            if ($resourceErrors) {
+                $this->errors = array_merge($this->errors, $resourceErrors);
+            } else {
+                $this->resources->$resourceName = $fields;
             }
         }
     }

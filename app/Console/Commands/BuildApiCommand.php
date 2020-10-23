@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Actions\BuildApi;
 use App\Actions\LoadResources;
+use App\Actions\LoadSeeds;
 
 class BuildApiCommand extends Command
 {
@@ -39,17 +40,33 @@ class BuildApiCommand extends Command
      */
     public function handle()
     {
-        $resources = new LoadResources();
-        $action = new BuildApi($resources->resources);
+        # Gather and validate resource JSON file
+        $loadResources = new LoadResources();
+       
+        # Gather and validate seed JSON files
+        $loadSeeds = new LoadSeeds($loadResources->resources);
+        
+        # Merge and display any errors
+        $errors = array_merge($loadResources->errors, $loadSeeds->errors);
+        if (count($errors) > 0) {
+            $this->error('API Build failed:');
+            foreach ($errors as $error) {
+                $this->error('* '.$error);
+            }
+            return;
+        }
 
+        # Build the API
+        $action = new BuildApi($loadResources->resources, $loadSeeds->seeds);
+
+        # Report on resources that were created
         $this->info('Resources created: ');
         foreach ($action->results['resources'] as $resource) {
             $this->info('* ' . $resource);
         }
         $this->info('');
-
         
-        
+        # Report on seeds that were run
         $this->info('Seeds run: ');
         foreach ($action->results['seeds'] as $seed => $data) {
             $this->info('* ' . $seed . ' (' . count($data['added']) . ' rows added)');
@@ -61,15 +78,14 @@ class BuildApiCommand extends Command
         }
         $this->info('');
 
-
+        # Report on any errors
         if (isset($action->results['errors'])) {
-            $this->info('Errors: ');
+            $this->error('Errors: ');
             foreach ($action->results['errors'] as $key => $data) {
                 $this->error($data);
             }
         }
 
-        
         return 0;
     }
 }
