@@ -104,10 +104,12 @@ class BuildApi
         ];
 
         if ($this->resourceName != "user") {
-            $class = "App\Models\GeneratedModels\\" . $this->resourceName;
+            $class = "App\Models\GeneratedModels\\" . $this->resourceNameStudly;
         } else {
-            $class = "App\Models\\" . $this->resourceName;
+            $class = "App\Models\\" . $this->resourceNameStudly;
         }
+
+        $results = ['error' => [], 'added' => []];
 
         foreach ($seeds->{$this->resourceName}->seeds as $data) {
             $resource = new $class;
@@ -121,8 +123,6 @@ class BuildApi
             }
 
             $error = null;
-
-            $results = ['error' => [], 'added' => []];
 
             try {
                 $resource->save();
