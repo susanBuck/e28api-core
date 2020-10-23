@@ -11,8 +11,7 @@ npm-debug.log
 yarn-error.log
 .env
 
-app/Models/GeneratedModels
 app/Http/Requests/GeneratedRequests
 routes/generated-routes.php
 database/migrations/9999*
-database/factories/GeneratedModels/
+
