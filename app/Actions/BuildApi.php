@@ -111,7 +111,7 @@ class BuildApi
 
         $results = ['error' => [], 'added' => []];
 
-        foreach ($seeds->{$this->resourceNameStudly}->seeds as $data) {
+        foreach ($seeds->{$this->resourceName}->seeds as $data) {
             $resource = new $class;
 
             foreach ($data as $key => $value) {
