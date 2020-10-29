@@ -98,18 +98,18 @@ class BuildApi
      */
     private function seedData($seeds)
     {
-        $results = [
-            'error' => [],
-            'success' => []
-        ];
+        $results = ['error' => [], 'added' => []];
 
+        # No seeds found for this resource
+        if (!property_exists($seeds, $this->resourceName)) {
+            return;
+        }
+        
         if ($this->resourceName != "user") {
             $class = "App\Models\GeneratedModels\\" . $this->resourceNameStudly;
         } else {
             $class = "App\Models\\" . $this->resourceNameStudly;
         }
-
-        $results = ['error' => [], 'added' => []];
 
         foreach ($seeds->{$this->resourceName}->seeds as $data) {
             $resource = new $class;

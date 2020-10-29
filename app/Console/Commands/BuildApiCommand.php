@@ -14,7 +14,7 @@ class BuildApiCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'e28-api:build';
+    protected $signature = 'e28-api:setup';
 
     /**
      * The console command description.
@@ -45,7 +45,7 @@ class BuildApiCommand extends Command
        
         # Gather and validate seed JSON files
         $loadSeeds = new LoadSeeds($loadResources->resources);
-        
+
         # Merge and display any errors
         $errors = array_merge($loadResources->errors, $loadSeeds->errors);
         if (count($errors) > 0) {
