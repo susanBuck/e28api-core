@@ -192,7 +192,7 @@ class BuildApi
     private function createController()
     {
         $template = File::get(base_path('templates/ResourceController.php'));
-        $template = str_replace('Resource', $this->resourceName, $template);
+        $template = str_replace('Resource', $this->resourceNameStudly, $template);
         $template = str_replace('resource', $this->resourceName, $template);
 
         $fieldsDeclaration = 'private $fields = [';
@@ -208,7 +208,7 @@ class BuildApi
 
         $template = str_replace('private $fields = [];', $fieldsDeclaration, $template);
 
-        File::put(app_path('Http/Controllers/GeneratedControllers/'.$this->resourceName.'Controller.php'), $template);
+        File::put(app_path('Http/Controllers/GeneratedControllers/'.$this->resourceNameStudly.'Controller.php'), $template);
     }
 
     /**
@@ -224,9 +224,8 @@ class BuildApi
 
             foreach ($details->validators as $validator) {
                 if (strstr($validator, 'unique')) {
-                    # Process a validator such as `unique:sku`
-                    $field = explode(':', $validator)[1]; # e.g. `sku`
-                    $rules .= '"unique:' . $this->resourceNameLowerPlural . ',' . $field . ',".$this->route("id"),';
+                    # Process a validator such as `unique`
+                    $rules .= '"unique:' . $this->resourceNameLowerPlural . ',' . $fieldName . ',".$this->route("id"),';
                 } else {
                     $rules .= "'$validator', ";
                 }
