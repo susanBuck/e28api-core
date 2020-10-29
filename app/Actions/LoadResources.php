@@ -34,7 +34,7 @@ class LoadResources
         # Load JSON from file
         $resources = json_decode($resourcesJson);
         if (!$resources) {
-            $this->errors[] = "Resource file $resourcePath is not valid JSON";
+            $this->errors[] = "Resource file $resourcePath does not contain valid JSON";
             return;
         }
 
@@ -51,7 +51,7 @@ class LoadResources
                 }
 
                 if (!property_exists($value, 'validators')) {
-                    $resourceErrors[] = "Resource `$resourceName`, field `$field` missing *validators*";
+                    $resourceErrors[] = "Resource `$resourceName`, field `$field` missing *validators* property. If this field does not require validation, set `validators` to an empty array []";
                 }
             }
             

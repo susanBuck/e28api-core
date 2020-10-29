@@ -42,15 +42,22 @@ class BuildApiCommand extends Command
     {
         # Gather and validate resource JSON file
         $loadResources = new LoadResources();
+        if (count($loadResources->errors) > 0) {
+            $this->error('API Build failed when loading resources:');
+            foreach ($loadResources->errors as $error) {
+                $this->error('* '.$error);
+            }
+            return;
+        }
+
        
         # Gather and validate seed JSON files
         $loadSeeds = new LoadSeeds($loadResources->resources);
 
         # Merge and display any errors
-        $errors = array_merge($loadResources->errors, $loadSeeds->errors);
-        if (count($errors) > 0) {
-            $this->error('API Build failed:');
-            foreach ($errors as $error) {
+        if (count($loadSeeds->errors) > 0) {
+            $this->error('API Build failed when loading seeds:');
+            foreach ($loadSeeds->errors as $error) {
                 $this->error('* '.$error);
             }
             return;

@@ -223,7 +223,7 @@ class BuildApi
             $rules .= "'$fieldName' => [";
 
             foreach ($details->validators as $validator) {
-                if (strstr($validator, 'unique')) {
+                if ($validator == 'unique') {
                     # Process a validator such as `unique`
                     $rules .= '"unique:' . $this->resourceNameLowerPlural . ',' . $fieldName . ',".$this->route("id"),';
                 } else {
