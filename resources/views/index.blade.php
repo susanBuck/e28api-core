@@ -27,7 +27,7 @@
 <section>
     <h2>Routes</h2>
 
-    <small>🔒 = User restricted route</small>
+    <small>🔒 = Auth-required</small>
 
     <table class='table table-light table-striped table-bordered table-sm'>
         <thead class='thead-dark'>
