@@ -12,7 +12,6 @@ class UserTest extends TestCase
     use WithFaker;
     use RefreshDatabase;
 
-
     /**
     *
     */

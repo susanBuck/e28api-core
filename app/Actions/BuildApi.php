@@ -224,9 +224,9 @@ class BuildApi
 
             foreach ($details->validators as $validator) {
                 if (strstr($validator, 'unique')) {
-                    //'slug' => ['required', 'min:3', 'unique:products,slug,'.$this->route("id")],
-                    //$rules .= 'Rule::unique("'.$this->resourceNameLowerPlural.'", "slug")->ignore($this->request->get("slug"))';
-                    $rules .= '"'.$validator.',".$this->route("id")';
+                    # Process a validator such as `unique:sku`
+                    $field = explode(':', $validator)[1]; # e.g. `sku`
+                    $rules .= '"unique:' . $this->resourceNameLowerPlural . ',' . $field . ',".$this->route("id"),';
                 } else {
                     $rules .= "'$validator', ";
                 }
@@ -239,7 +239,7 @@ class BuildApi
         $template = str_replace('Resource', $this->resourceName, $template);
         $template = str_replace('resource', $this->resourceName, $template);
 
-        File::put(app_path('Http/Requests/GeneratedRequests/' . $this->resourceName . 'Request.php'), $template);
+        File::put(app_path('Http/Requests/GeneratedRequests/' . $this->resourceNameStudly . 'Request.php'), $template);
     }
 
     /**

@@ -32,22 +32,27 @@
     <table class='table table-light table-striped table-bordered table-sm'>
         <thead class='thead-dark'>
             <tr>
+                <th>Name</th>
                 <th>HTTP Method</th>
                 <th>URL</th>
                 <th>Usage & Params</th>
             </tr>
         </thead>
         <tr>
+            <td>login</td>
             <td><code>POST</code></code></td>
             <td><code>/login</code></td>
+
             <td>Log in a user (<code>email</code>, <code>password</code>)</td>
         </tr>
         <tr>
+            <td>logout</td>
             <td><code>POST</code></td>
             <td><code>/logout</code></td>
             <td>Log out a user</td>
         </tr>
         <tr>
+            <td>register</td>
             <td><code>POST</code></td>
             <td><code>/register</code></td>
             <td>Register a new user (<code>name</code>, <code>email</code>, <code>password</code>)</td>
@@ -56,6 +61,7 @@
 
         @foreach($resources as $resourceName => $fields)
         <tr>
+            <td>index</td>
             <td><code>GET</code></td>
             <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}</code></td>
 
@@ -63,36 +69,32 @@
 
         </tr>
         <tr>
+            <td>show</td>
             <td><code>GET</code></td>
             <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/{id}</code></td>
-
             <td>Show an individual {{ $resourceName }}</td>
-
-
         </tr>
         <tr>
+            <td>store</td>
             <td><code>POST</code></td>
             <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}</code></td>
-
             <td>Store a new {{ $resourceName }}</td>
-
-
         </tr>
         <tr>
+            <td>update</td>
             <td><code>PUT</code></td>
             <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/{id}</code></td>
-
             <td>Update an existing {{ $resourceName }}</td>
-
-
         </tr>
         <tr>
+            <td>destroy</td>
             <td><code>DELETE</code></td>
             <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/{id}</code></td>
 
             <td>Delete an existing {{ $resourceName }}</td>
         </tr>
         <tr>
+            <td>query</td>
             <td><code>GET</code></td>
             <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/query?key=value&key=value</code></td>
             <td>Query a {{ $resourceName }}</td>

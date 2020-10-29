@@ -22,10 +22,12 @@ class LoadResources
         # Initialize resources as an empty object
         $this->resources = new stdClass();
 
+        $resourcePath = base_path('../resources.json');
+
         # Load resources.json file
         $resourcesJson = File::get(base_path('../resources.json'));
         if (!$resourcesJson) {
-            $this->errors[] = "Resource file not found at " . base_path('../resources.json');
+            $this->errors[] = "Resource file not found at " . $resourcePath;
             return;
         }
 
