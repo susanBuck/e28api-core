@@ -109,7 +109,8 @@
 <section>
     <h2>Database</h2>
     <small>
-        Note: Because this API is designed for demonstration purposes, this database info is publically viewable. In a
+        Note: Because this API is designed for demonstration purposes, this database info is publicly viewable. In a
+
         real-world application, this information should be restricted.
     </small>
 
