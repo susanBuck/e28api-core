@@ -135,7 +135,7 @@
                 @foreach($data as $row)
                 <tr>
                     @foreach($row as $key => $value)
-                    <td>{{ $value }}</td>
+                    <td>{{ $key == 'password' ? '***' : $value }}</td>
                     @endforeach
                 </tr>
                 @endforeach
