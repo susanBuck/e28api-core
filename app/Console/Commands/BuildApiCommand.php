@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Actions\BuildApi;
 use App\Actions\LoadResources;
 use App\Actions\LoadSeeds;
+use File;
 
 class BuildApiCommand extends Command
 {
@@ -41,7 +42,17 @@ class BuildApiCommand extends Command
     public function handle()
     {
         # Gather and validate resource JSON file
-        $loadResources = new LoadResources();
+        $resourcePath = base_path('../resources.json');
+
+        # Load resources.json file
+        $resourcesJson = File::get($resourcePath);
+        if (!$resourcesJson) {
+            $this->error("Resource file not found at " . $resourcePath);
+            return;
+        }
+
+        $loadResources = new LoadResources($resourcesJson);
+
         if (count($loadResources->errors) > 0) {
             $this->error('API Build failed when loading resources:');
             foreach ($loadResources->errors as $error) {
@@ -49,12 +60,9 @@ class BuildApiCommand extends Command
             }
             return;
         }
-
        
         # Gather and validate seed JSON files
         $loadSeeds = new LoadSeeds($loadResources->resources);
-
-        # Merge and display any errors
         if (count($loadSeeds->errors) > 0) {
             $this->error('API Build failed when loading seeds:');
             foreach ($loadSeeds->errors as $error) {
