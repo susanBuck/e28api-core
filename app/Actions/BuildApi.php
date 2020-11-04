@@ -269,7 +269,7 @@ class BuildApi
         $schema = '';
 
         foreach ($this->fields as $field => $fieldDetails) {
-            $schema .= "\$table->" . $fieldDetails->type . "('" . $field ."'); \n";
+            $schema .= "\$table->" . $fieldDetails->type . "('" . $field ."')->nullable(); \n";
         }
 
         $template = str_replace('# schema #', $schema, $template);
