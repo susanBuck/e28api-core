@@ -235,7 +235,7 @@ class BuildApi
         $rules .= "];";
         
         $template = str_replace('# rules #', $rules, $template);
-        $template = str_replace('Resource', $this->resourceName, $template);
+        $template = str_replace('Resource', $this->resourceNameStudly, $template);
         $template = str_replace('resource', $this->resourceName, $template);
 
         File::put(app_path('Http/Requests/GeneratedRequests/' . $this->resourceNameStudly . 'Request.php'), $template);
