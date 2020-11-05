@@ -41,12 +41,10 @@ class BuildApiCommand extends Command
      */
     public function handle()
     {
-        # Gather and validate resource JSON file
         $resourcePath = base_path('../resources.json');
-
-        # Load resources.json file
-        $resourcesJson = File::get($resourcePath);
-        if (!$resourcesJson) {
+        if (File::exists($resourcePath)) {
+            $resourcesJson = File::get($resourcePath);
+        } else {
             $this->error("Resource file not found at " . $resourcePath);
             return;
         }

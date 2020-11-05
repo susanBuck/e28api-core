@@ -20,12 +20,13 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        # Gather and validate resource JSON file
         $resourcePath = base_path('../resources.json');
-
-        # Load resources.json file
-        $resourcesJson = File::get($resourcePath);
-
+        if (File::exists($resourcePath)) {
+            $resourcesJson = File::get($resourcePath);
+        } else {
+            dd("Resource file not found at " . $resourcePath);
+        }
+        
         $loadResources = new LoadResources($resourcesJson);
         $this->resources = $loadResources->resources;
     }
