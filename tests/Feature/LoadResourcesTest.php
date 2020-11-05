@@ -11,7 +11,7 @@ use App\Actions\LoadResources;
 use App\Actions\BuildApi;
 use Str;
 
-class BuildApiTest extends TestCase
+class LoadResourcesTest extends TestCase
 {
     use WithFaker;
     use RefreshDatabase;

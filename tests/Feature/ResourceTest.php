@@ -62,7 +62,7 @@ class Resourcetest extends TestCase
     }
 
     /**
-     * @group focus
+     *
      */
     public function testSuccessfullyAddingProduct()
     {
@@ -91,7 +91,7 @@ class Resourcetest extends TestCase
     }
 
     /**
-     * @group focus
+     *
      */
     public function testValidators()
     {
