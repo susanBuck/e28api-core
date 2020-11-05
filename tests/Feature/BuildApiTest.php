@@ -28,6 +28,24 @@ class BuildApiTest extends TestCase
         $this->assertTrue($resources->resources->favorite !== null);
     }
 
+    /**
+     *
+     */
+    public function testInvalidResourceName()
+    {
+        $json = '{
+            "product1": {
+                "name": {
+                    "type": "string",
+                    "validators": []
+                }
+            }
+        }';
+
+        $resources = new LoadResources($json);
+        
+        $this->assertTrue($resources->errors[0] == "Resource name `product1` is invalid; must only contain letters");
+    }
     
     /**
      *
