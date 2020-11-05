@@ -2,7 +2,7 @@
 
 @section('body')
 
-<h1>API</h1>
+<h1 data-test='api-heading'>API</h1>
 
 <section>
     <h2>Allowed origins</h2>
