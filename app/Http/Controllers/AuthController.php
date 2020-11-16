@@ -11,15 +11,15 @@ use Auth;
 class AuthController extends Controller
 {
     /**
-     *
+     * POST /auth
      */
     public function auth(Request $request)
     {
         $response = [
             'loggedIn' => $request->user() ? true : false,
-            'user' => $request->user()
+            'user' => $request->user(),
         ];
-        
+
         return response($response, 200);
     }
 
@@ -35,7 +35,7 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             return response([
-            'message' => ['Login failed'],
+            'success' => false,
             'errors' => $validator->errors()->all()
             ], 200);
         }
@@ -62,7 +62,6 @@ class AuthController extends Controller
         } else {
             $response = [
                 'success' => false,
-                'message' => 'Login failed',
                 'errors' => ['These credentials do not match our records'],
                 'test' => 'login-failed-bad-credentials'
             ];
@@ -114,9 +113,14 @@ class AuthController extends Controller
     {
         if ($request->user()) {
             $request->user()->tokens()->delete();
-            $response = ['success' => true, 'message' => 'Logout succesful'];
+            $response = [
+                'success' => true
+            ];
         } else {
-            $response = ['success' => false, 'message' => 'User not logged in'];
+            $response = [
+                'success' => false,
+                'errors' => ['User not logged in']
+            ];
         }
 
         return response($response, 200); # 200
