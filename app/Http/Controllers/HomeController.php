@@ -36,7 +36,10 @@ class HomeController extends Controller
      */
     public function index()
     {
+        dump('sanctum.stateful:');
         dump(config('sanctum.stateful'));
+
+        dump('session.domain:');
         dump(config('session.domain'));
 
         $loadDatabaseTables = new LoadDatabaseTables();

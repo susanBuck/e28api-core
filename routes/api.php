@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\File;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductsController;
 
-Route::middleware('auth:sanctum')->post('/auth', [AuthController::class, 'auth']);
+Route::post('/auth', [AuthController::class, 'auth']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);

@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Validator;
-use Auth;
 
 class AuthController extends Controller
 {
@@ -16,7 +16,8 @@ class AuthController extends Controller
     public function auth(Request $request)
     {
         $response = [
-            'loggedIn' => $request->user() ? true : false,
+            'success' => true, // True means the request was processsed; does not mean user is authed
+            'authenticated' => $request->user() ? true : false,
             'user' => $request->user(),
         ];
 
@@ -107,12 +108,15 @@ class AuthController extends Controller
     }
 
     /**
-     * GET /api/logout
+     * GET /logout
      */
     public function logout(Request $request)
     {
         if ($request->user()) {
+            \Illuminate\Support\Facades\Auth::logout(); #  Illuminate\\Auth\\RequestGuard::logout does not exist.
+
             $request->user()->tokens()->delete();
+            
             $response = [
                 'success' => true
             ];
@@ -123,6 +127,6 @@ class AuthController extends Controller
             ];
         }
 
-        return response($response, 200); # 200
+        return response($response, 200);
     }
 }

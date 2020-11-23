@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\User;
+use Laravel\Sanctum\Sanctum;
 
 class UserTest extends TestCase
 {
@@ -56,7 +57,7 @@ class UserTest extends TestCase
             'email' => $user->email,
             'password' => 'asdfasdf'
         ]);
-        
+
         $r->assertStatus(200);
         $r->assertJson(['success' => true]);
         $r->assertJsonPath('user.email', $user->email);
@@ -78,5 +79,40 @@ class UserTest extends TestCase
         $r->assertStatus(200);
         $r->assertJson(['success' => false]);
         $r->assertJsonPath('test', 'login-failed-bad-credentials');
+    }
+
+    /**
+     *
+     */
+    public function testNonLoggedInUserIsNotAuthed()
+    {
+        $r = $this->json('POST', '/auth');
+        $r->assertStatus(200);
+        $r->assertJson([
+            'success' => true,
+            'authenticated' => false,
+            'user' => null
+        ]);
+    }
+
+    /**
+     *
+     */
+    public function testLoggedInUserIsAuthed()
+    {
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+
+        $r = $this->json('POST', '/auth');
+
+        $r->assertStatus(200);
+
+        $r->assertJson([
+            'success' => true,
+            'authenticated' => true,
+        ]);
+
+        $r->assertJsonPath('user.email', $user->email);
     }
 }
