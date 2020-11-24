@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Validator;
+use Session;
 
 class AuthController extends Controller
 {
@@ -42,25 +43,16 @@ class AuthController extends Controller
             ], 200);
         }
 
-        $authed = Auth::attempt([
+        $user = Auth::attempt([
             'email' => $request->email,
             'password' => $request->password
         ]);
 
-        if ($authed) {
-            $user = User::where('email', $request->email)->first();
-
-            // Delete any existing tokens this user may have
-            $user->tokens()->delete();
-
-            // Create them a new token
-            $token = $user->createToken(config('app.name'))->plainTextToken;
-
+        if ($user) {
             $response = [
                 'success' => true,
                 'authenticated' => true,
                 'user' => $user,
-                'token' => $token
             ];
         } else {
             $response = [
@@ -74,7 +66,7 @@ class AuthController extends Controller
     }
 
     /**
-     *
+     * POST /register
      */
     public function register(Request $request)
     {
@@ -98,37 +90,26 @@ class AuthController extends Controller
             'password' => \Hash::make($request->password)
         ]);
        
-        $token = $user->createToken(config('app.name'))->plainTextToken;
+        Auth::login($user);
 
         $response = [
             'success' => true,
             'user' => $user,
-            'token' => $token
         ];
 
-        return response($response, 201); # 201 created
+        return response($response, 200);
     }
 
     /**
-     * GET /logout
+     * POST /logout
      */
     public function logout(Request $request)
     {
-        if ($request->user()) {
-            \Illuminate\Support\Facades\Auth::logout(); #  Illuminate\\Auth\\RequestGuard::logout does not exist.
+        Session::flush();
 
-            $request->user()->tokens()->delete();
-            
-            $response = [
-                'success' => true
-            ];
-        } else {
-            $response = [
-                'success' => false,
-                'errors' => ['User not logged in']
-            ];
-        }
-
-        return response($response, 200);
+        return response([
+            'success' => true,
+            'authenticated' => false,
+        ], 200);
     }
 }

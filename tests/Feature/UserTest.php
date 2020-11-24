@@ -18,13 +18,19 @@ class UserTest extends TestCase
     */
     public function testSuccesfulRegistration()
     {
+        # make will create the user but not persist it
+        $user = User::factory()->make();
+
         $r = $this->json('POST', '/register', [
-            'name' => $this->faker->name,
-            'email' => $this->faker->email,
+            'name' => $user->name,
+            'email' => $user->email,
             'password' => $this->faker->password(8)
         ]);
 
-        $r->assertStatus(201);
+        $r->assertStatus(200);
+        $r->assertJsonPath('success', true);
+        $r->assertJsonPath('user.name', $user->name);
+        $r->assertJsonPath('user.email', $user->email);
     }
 
     /**
@@ -41,7 +47,6 @@ class UserTest extends TestCase
         ]);
 
         $r->assertStatus(200);
-
         $r->assertJsonPath('success', false);
         $r->assertJsonPath('test', 'registration-failed');
     }
@@ -61,7 +66,6 @@ class UserTest extends TestCase
         $r->assertStatus(200);
         $r->assertJson(['success' => true]);
         $r->assertJsonPath('user.email', $user->email);
-        $r->assertSeeText('token');
     }
 
     /**
@@ -87,6 +91,7 @@ class UserTest extends TestCase
     public function testNonLoggedInUserIsNotAuthed()
     {
         $r = $this->json('POST', '/auth');
+        
         $r->assertStatus(200);
         $r->assertJson([
             'success' => true,
@@ -114,5 +119,24 @@ class UserTest extends TestCase
         ]);
 
         $r->assertJsonPath('user.email', $user->email);
+    }
+
+    /**
+     *
+     */
+    public function testSuccessfulLogout()
+    {
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user);
+
+        $r = $this->json('POST', '/logout');
+
+        $r->assertStatus(200);
+
+        $r->assertJson([
+            'success' => true,
+            'authenticated' => false,
+        ]);
     }
 }
