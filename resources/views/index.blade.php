@@ -4,23 +4,43 @@
 
 <h1 data-test='api-heading'>API</h1>
 
-<section>
-    <h2>Allowed origins</h2>
+<section id='configs'>
+    <h2>Configs</h2>
 
-    @if($allowedOrigins[0] == '*')
-    <code>PUBLIC: Any site can use this API</code>
+    <h3>Allowed origins</h3>
 
-
-    @else
-    This API will only respond to requests from these domains:
+    <p>What domains can make requests to this API:</p>
     <ul>
+        @if($allowedOrigins[0] == '*')
+        <li><code>*</code> (Any domain)</li>
+
+        @else
+
         @foreach($allowedOrigins as $origin)
         <li><code>{{ $origin }}</code></li>
         @endforeach
-    </ul>
-    @endif
 
-    <p>(<small>Configure via <code>/core/.env</code></small>)</p>
+        @endif
+    </ul>
+    <small>Configure via <code>CORS_ALLOWED_ORIGINS</code> in <em>/core/.env</em></small>
+
+
+    <h3>Stateful domains</h3>
+    <p>What domains and/or subdomains will receive stateful API authentication cookies in response to succesful login requests:</p>
+    <ul>
+        @foreach($statefulDomains as $domain)
+        <li><code>{{ $domain }}</code></li>
+        @endforeach
+    </ul>
+    <small>Configure via <code>SANCTUM_STATEFUL_DOMAINS</code> in <em>/core/.env</em></small>
+
+
+    <h3>Session domain</h3>
+    <p>Authentication cookies will be valid under this root domain:</p>
+    <ul>
+        <li><code>{{ $sessionDomain }}</code></li>
+    </ul>
+    <small>Configure via <code>SESSION_DOMAIN</code> in <em>/core/.env</em></small>
 
 </section>
 
@@ -38,6 +58,14 @@
                 <th>Usage & Params</th>
             </tr>
         </thead>
+        <tr>
+            <td>auth</td>
+            <td><code>POST</code></code></td>
+            <td><code>/auth</code></td>
+
+            <td>Check a visitor’s authentication status</td>
+        </tr>
+
         <tr>
             <td>login</td>
             <td><code>POST</code></code></td>

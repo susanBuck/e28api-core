@@ -12,11 +12,12 @@ class AuthController extends Controller
 {
     /**
      * POST /auth
+     * When the client is first mounted, it pings this route to check its authentication status
      */
     public function auth(Request $request)
     {
         $response = [
-            'success' => true, // True means the request was processsed; does not mean user is authed
+            'success' => true,
             'authenticated' => $request->user() ? true : false,
             'user' => $request->user(),
         ];
@@ -57,6 +58,7 @@ class AuthController extends Controller
 
             $response = [
                 'success' => true,
+                'authenticated' => true,
                 'user' => $user,
                 'token' => $token
             ];

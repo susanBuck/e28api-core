@@ -36,18 +36,14 @@ class HomeController extends Controller
      */
     public function index()
     {
-        dump('sanctum.stateful:');
-        dump(config('sanctum.stateful'));
-
-        dump('session.domain:');
-        dump(config('session.domain'));
-
         $loadDatabaseTables = new LoadDatabaseTables();
 
         return view('index')->with([
             'database' => $loadDatabaseTables->results,
             'resources' => $this->resources,
-            'allowedOrigins' => config('cors.allowed_origins')
+            'allowedOrigins' => config('cors.allowed_origins'),
+            'statefulDomains' => config('sanctum.stateful'),
+            'sessionDomain' => config('session.domain')
         ]);
     }
 }

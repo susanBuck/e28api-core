@@ -1,20 +1,21 @@
-/* @tailwind base;
-
-@tailwind components;
-
-@tailwind utilities; */
-
 body {
-  margin: 25px;
+    margin: 25px;
 }
 
 section {
-  padding: 25px;
-  margin-bottom: 25px;
-  border: 1px solid #ccc;
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 1px solid #ccc;
 }
 
 .db-table {
-  padding: 25px;
-  margin-top: 20px;
+    padding: 25px;
+    margin-top: 20px;
+}
+
+#configs h3 {
+    font-size: 1.2rem;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #ccc;
 }
