@@ -63,8 +63,6 @@ class UserTest extends TestCase
             'password' => 'asdfasdf'
         ]);
 
-        $this->shortDump($r);
-
         $r->assertStatus(200);
         $r->assertJsonPath('success', true);
         $r->assertJsonPath('user.email', $user->email);

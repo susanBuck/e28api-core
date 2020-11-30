@@ -5,7 +5,7 @@
 <h1 data-test='api-heading'>API</h1>
 
 <section id='configs'>
-    <h2>Configs</h2>
+    <h2>Security Configs</h2>
 
     <h3>Allowed origins</h3>
 
@@ -22,25 +22,33 @@
 
         @endif
     </ul>
-    <small>Configure via <code>CORS_ALLOWED_ORIGINS</code> in <em>/core/.env</em></small>
+    <small>Configure via <em>CORS_ALLOWED_ORIGINS</em> in <em>/core/.env</em></small>
 
 
     <h3>Stateful domains</h3>
     <p>What domains and/or subdomains will receive stateful API authentication cookies in response to succesful login requests:</p>
     <ul>
+        @if($statefulDomains[0] == '')
+        <code>None specified</code>
+        @else
         @foreach($statefulDomains as $domain)
         <li><code>{{ $domain }}</code></li>
         @endforeach
+        @endif
     </ul>
-    <small>Configure via <code>SANCTUM_STATEFUL_DOMAINS</code> in <em>/core/.env</em></small>
+    <small>Configure via <em>SANCTUM_STATEFUL_DOMAINS</em> in <em>/core/.env</em></small>
 
 
     <h3>Session domain</h3>
-    <p>Authentication cookies will be valid under this root domain:</p>
-    <ul>
-        <li><code>{{ $sessionDomain }}</code></li>
-    </ul>
-    <small>Configure via <code>SESSION_DOMAIN</code> in <em>/core/.env</em></small>
+    <p>Authentication cookies will be valid under this root domain: <code>{{ $sessionDomain }}</code></p>
+
+    <small>Configure via <em>SESSION_DOMAIN</em> in <em>/core/.env</em></small>
+
+
+    <h3>Session secure cookie</h3>
+    <p>Authentication cookies will only be sent back if the browser has a HTTPS connection: <code>{{ $httpsCookie ? 'True' : 'False' }}</code></p>
+
+    <small>Configure via <em>SESSION_SECURE_COOKIE</em> in <em>/core/.env</em></small>
 
 </section>
 
@@ -59,19 +67,17 @@
             </tr>
         </thead>
         <tr>
-            <td>auth</td>
-            <td><code>POST</code></code></td>
-            <td><code>/auth</code></td>
-
-            <td>Check a visitor’s authentication status</td>
-        </tr>
-
-        <tr>
             <td>login</td>
             <td><code>POST</code></code></td>
             <td><code>/login</code></td>
+            <td>Log in a user (<code>email</code>, <code>password</code>); includes a <em>Set-Cookie</em> HTTP response header if successful</em></td>
 
-            <td>Log in a user (<code>email</code>, <code>password</code>)</td>
+        </tr>
+        <tr>
+            <td>auth</td>
+            <td><code>POST</code></code></td>
+            <td><code>/auth</code></td>
+            <td>Check a visitor’s authentication status; expects <em>XMLHttpRequest.withCredentials</em> to authorize</td>
         </tr>
         <tr>
             <td>logout</td>

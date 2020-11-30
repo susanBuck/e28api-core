@@ -43,7 +43,8 @@ class HomeController extends Controller
             'resources' => $this->resources,
             'allowedOrigins' => config('cors.allowed_origins'),
             'statefulDomains' => config('sanctum.stateful'),
-            'sessionDomain' => config('session.domain')
+            'sessionDomain' => config('session.domain'),
+            'httpsCookie' => config('session.secure')
         ]);
     }
 }
