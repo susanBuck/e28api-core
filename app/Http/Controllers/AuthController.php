@@ -43,16 +43,16 @@ class AuthController extends Controller
             ], 200);
         }
 
-        $user = Auth::attempt([
+        $authed = Auth::attempt([
             'email' => $request->email,
             'password' => $request->password
         ]);
 
-        if ($user) {
+        if ($authed) {
             $response = [
                 'success' => true,
                 'authenticated' => true,
-                'user' => $user,
+                'user' => User::where('email', $request->email)->first(),
             ];
         } else {
             $response = [

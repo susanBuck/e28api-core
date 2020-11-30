@@ -52,7 +52,7 @@ class UserTest extends TestCase
     }
 
     /**
-     *
+     * @group focus
      */
     public function testSuccesfulLogin()
     {
@@ -63,8 +63,10 @@ class UserTest extends TestCase
             'password' => 'asdfasdf'
         ]);
 
+        $this->shortDump($r);
+
         $r->assertStatus(200);
-        $r->assertJson(['success' => true]);
+        $r->assertJsonPath('success', true);
         $r->assertJsonPath('user.email', $user->email);
     }
 
