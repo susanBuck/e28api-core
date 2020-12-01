@@ -9,10 +9,10 @@
 
     <h3>Allowed origins</h3>
 
-    <p>What domains can make requests to this API:</p>
+    <p>What URLs can make requests to this API:</p>
     <ul>
         @if($allowedOrigins[0] == '*')
-        <li><code>*</code> (Any domain)</li>
+        <li><code>*</code> (Any URL)</li>
 
         @else
 
@@ -22,7 +22,7 @@
 
         @endif
     </ul>
-    <small>Configure via <em>CORS_ALLOWED_ORIGINS</em> in <em>/core/.env</em></small>
+    <small>Configure via <em>CORS_ALLOWED_ORIGINS</em> in <em>/e28-api/core/.env</em></small>
 
 
     <h3>Stateful domains</h3>
@@ -36,19 +36,19 @@
         @endforeach
         @endif
     </ul>
-    <small>Configure via <em>SANCTUM_STATEFUL_DOMAINS</em> in <em>/core/.env</em></small>
+    <small>Configure via <em>SANCTUM_STATEFUL_DOMAINS</em> in <em>/e28-api/core/.env</em></small>
 
 
     <h3>Session domain</h3>
     <p>Authentication cookies will be valid under this root domain: <code>{{ $sessionDomain }}</code></p>
 
-    <small>Configure via <em>SESSION_DOMAIN</em> in <em>/core/.env</em></small>
+    <small>Configure via <em>SESSION_DOMAIN</em> in <em>/e28-api/core/.env</em></small>
 
 
     <h3>Session secure cookie</h3>
     <p>Authentication cookies will only be sent back if the browser has a HTTPS connection: <code>{{ $httpsCookie ? 'True' : 'False' }}</code></p>
 
-    <small>Configure via <em>SESSION_SECURE_COOKIE</em> in <em>/core/.env</em></small>
+    <small>Configure via <em>SESSION_SECURE_COOKIE</em> in <em>/e28-api/core/.env</em></small>
 
 </section>
 
