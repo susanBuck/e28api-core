@@ -220,6 +220,10 @@ class BuildApi
        
         $rules = "return [\n";
         foreach ($this->fields as $fieldName => $details) {
+            if ($fieldName == 'user_id') {
+                continue;
+            }
+            
             $rules .= "'$fieldName' => [";
 
             foreach ($details->validators as $validator) {

@@ -23,7 +23,6 @@ class RestrictedResourceTest extends TestCase
         # Setup
         $userA = User::factory()->create();
         $userB = User::factory()->create();
-
         $favorite1 = Favorite::factory()->create(['user_id' => $userA->id]);
         $favorite2 = Favorite::factory()->create(['user_id' => $userB->id]);
 
@@ -34,27 +33,11 @@ class RestrictedResourceTest extends TestCase
         # Assert
         $r->assertJsonCount(1, 'favorite'); # We should see 1, not 2 favorites
     }
-    
-    /**
-     *
-     */
-    public function testGetFavoriteAsNonOwner()
-    {
-        $favorite = Favorite::factory()->create();
-
-        # Log in as a user that does not "own" this favorite
-        $r = $this->actingAs(User::factory()->create());
-
-        $r = $this->get('/favorite/'.$favorite->id);
-
-        $r->assertJsonPath('success', false);
-        $r->assertJsonPath('test', 'data-access-denied');
-    }
 
     /**
      *
      */
-    public function testGetFavoriteAsOwner()
+    public function testYouCanViewAFavoriteThatIsYours()
     {
         $user = User::factory()->create();
 
@@ -70,11 +53,23 @@ class RestrictedResourceTest extends TestCase
 
     /**
      *
-     * If a resource is user restricted, a logged in user should not be able to
-     * add a resource for another user.
-     * This is unlikely to happen via the interface, but it should still be checked
      */
-    public function testYouCantAddFavoriteForSomeoneElse()
+    public function testYouCantViewAFavoriteThatIsNotYours()
+    {
+        $favorite = Favorite::factory()->create(); # This will generate it's own user
+        $user = User::factory()->create(); # This will be the user we log in as
+
+        $r = $this->actingAs($user);
+        $r = $this->get('/favorite/'.$favorite->id);
+
+        $r->assertJsonPath('success', false);
+        $r->assertJsonPath('test', 'data-access-denied');
+    }
+
+    /**
+     *
+     */
+    public function testYouCantAddAFavoriteForSomeoneElse()
     {
         $product = Product::factory()->create();
 
@@ -83,49 +78,54 @@ class RestrictedResourceTest extends TestCase
 
         $r = $this->actingAs($userA);
 
+        # Here we'll attempt to add a favorite, and specify the user_id for a userB
+        # even though we're logged in as userA
+        # Rather than fail, it will just overwrite the user_id we specified with our actual user_id
         $r = $this->json('POST', '/favorite', [
             'user_id' => $userB->id,
             'product_id' => $product->id,
         ]);
 
-        $r->assertJsonPath('success', false);
-        $r->assertJsonPath('test', 'action-unauthorized');
+        $r->assertJsonPath('success', true);
+        $r->assertJsonPath('favorite.user_id', $userA->id);
     }
 
     /**
-     * @group focus
+     *
      */
-    public function testNewFavoritesAreAutomaticallyAssociatedWithAuthenticatedUser()
+    public function testNewFavoritesAreAssociatedWithAuthenticatedUser()
     {
+        # Setup
         $product = Product::factory()->create();
         $user = User::factory()->create();
-        
-        Sanctum::actingAs($user);
 
+        # Act
+        $r = $this->actingAs($user);
         $r = $this->json('POST', '/favorite', [
             'product_id' => $product->id,
         ]);
 
+        # Assert
         $favorite = Favorite::where('user_id', $user->id)->where('product_id', $product->id)->first();
-
-        $this->assertTrue($favorite);
+        $this->assertTrue($favorite->user_id == $user->id);
         $r->assertJsonPath('success', true);
     }
 
     /**
      *
      */
-    public function testYouCantDeleteFavoriteAsNonOwner()
+    public function testYouCantDeleteFavoriteThatIsNotYours()
     {
+        # Setup
         $userA = User::factory()->create();
         $userB = User::factory()->create();
-
         $favorite = Favorite::factory()->create(['user_id' => $userB->id]);
-       
-        Sanctum::actingAs($userA);
-
+        
+        # Act
+        $r = $this->actingAs($userA);
         $r = $this->json('DELETE', '/favorite/'.$favorite->id);
 
+        # Assert
         $r->assertJsonPath('success', false);
         $r->assertJsonPath('test', 'data-access-denied');
     }

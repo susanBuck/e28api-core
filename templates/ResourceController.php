@@ -73,7 +73,7 @@ class ResourceController extends \App\Http\Controllers\Controller
         foreach ($this->fields as $fieldName => $rule) {
             $resource->$fieldName = $request->$fieldName;
         }
-
+        
         if ($resource->userRestricted) {
             $resource->user_id = $request->user()->id;
         }

@@ -20,15 +20,24 @@ class ResourceRequest extends FormRequest
     {
         $resource = new Resource();
 
+        # If this resource is not user restricted, then everyone is authorized
         if (!$resource->userRestricted) {
             return true;
         }
 
-        if (!$this->user) {
+        # If they're not logged in, they can't be authorized
+        if (!$this->user()) {
             return false;
         }
 
-        return $this->user()->id == $resource->find($this->route("id"))->id;
+        # If the request includes an id, we need to find that resource by id
+        # and check that its user_id matches the id of the requesting user
+        if (!is_null($this->route('id'))) {
+            return $this->user()->id == $resource->find($this->route('id'))->user_id;
+        }
+
+        # If they passed all the above tests, we can assume they're authorized
+        return true;
 
         # Note: If this function returns false, it will return a AccessDeniedHttpException which is
         # handled in /app/Exceptions/handler.php
