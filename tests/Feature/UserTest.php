@@ -52,7 +52,7 @@ class UserTest extends TestCase
     }
 
     /**
-     * @group focus
+     *
      */
     public function testSuccesfulLogin()
     {

@@ -70,68 +70,95 @@
             <td>login</td>
             <td><code>POST</code></code></td>
             <td><code>/login</code></td>
-            <td>Log in a user (<code>email</code>, <code>password</code>); includes a <em>Set-Cookie</em> HTTP response header if successful</em></td>
+            <td>Log in a user (expects params: <code>email</code>, <code>password</code>); includes a <em>Set-Cookie</em> HTTP response header if successful.</em></td>
+
 
         </tr>
         <tr>
             <td>auth</td>
             <td><code>POST</code></code></td>
             <td><code>/auth</code></td>
-            <td>Check a visitor’s authentication status; expects <em>XMLHttpRequest.withCredentials</em> to authorize</td>
+            <td>Check a visitor’s authentication status.</td>
         </tr>
         <tr>
             <td>logout</td>
             <td><code>POST</code></td>
             <td><code>/logout</code></td>
-            <td>Log out a user</td>
+            <td>Log out a user.</td>
         </tr>
         <tr>
             <td>register</td>
             <td><code>POST</code></td>
             <td><code>/register</code></td>
-            <td>Register a new user (<code>name</code>, <code>email</code>, <code>password</code>)</td>
+            <td>Register a new user (expects params: <code>name</code>, <code>email</code>, <code>password</code>).</td>
         </tr>
-
 
         @foreach($resources as $resourceName => $fields)
         <tr>
             <td>index</td>
             <td><code>GET</code></td>
             <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}</code></td>
-
-            <td>Show all {{ Str::plural($resourceName) }}</td>
-
+            <td>Show all <em>{{ Str::plural($resourceName) }}</em>.
+                @if(property_exists($fields, 'user_id'))
+                Will only return <em>{{ Str::plural($resourceName) }}</em> belonging to the currently authenticated user.
+                @endif
+            </td>
         </tr>
         <tr>
             <td>show</td>
             <td><code>GET</code></td>
             <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/{id}</code></td>
-            <td>Show an individual {{ $resourceName }}</td>
+            <td>Show an individual <em>{{ $resourceName }}</em>.
+                @if(property_exists($fields, 'user_id'))
+                Only works if the requested <em>{{ $resourceName }}</em> belongs to the currently authenticated user.
+                @endif
+            </td>
         </tr>
         <tr>
             <td>store</td>
             <td><code>POST</code></td>
             <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}</code></td>
-            <td>Store a new {{ $resourceName }}</td>
+            <td>Store a new <em>{{ $resourceName }}</em>.
+                @if(property_exists($fields, 'user_id'))
+                By default, the new <em>{{ $resourceName }}</em> will be associated with the currently authenticated user.
+                @endif
+            </td>
         </tr>
         <tr>
             <td>update</td>
             <td><code>PUT</code></td>
             <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/{id}</code></td>
-            <td>Update an existing {{ $resourceName }}</td>
+            <td>Update an existing <em>{{ $resourceName }}</em>.
+                @if(property_exists($fields, 'user_id'))
+                Only works if the <em>{{ $resourceName }}</em> being updated belongs to the currently authenticated user.
+
+
+                @endif
+            </td>
+
         </tr>
         <tr>
             <td>destroy</td>
             <td><code>DELETE</code></td>
             <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/{id}</code></td>
 
-            <td>Delete an existing {{ $resourceName }}</td>
+            <td>Delete an existing <em>{{ $resourceName }}</em>.
+                @if(property_exists($fields, 'user_id'))
+                Only works if the <em>{{ $resourceName }}</em> being deleted belongs to the currently authenticated user.
+                @endif
+            </td>
         </tr>
         <tr>
             <td>query</td>
             <td><code>GET</code></td>
-            <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/query?key=value&key=value</code></td>
-            <td>Query a {{ $resourceName }}</td>
+            <td>{{ property_exists($fields, 'user_id') ? '🔒' : ' ' }} <code>/{{ $resourceName }}/query?field=value&field=value</code></td>
+            <td>Query a <em>{{ $resourceName }}</em> by the given field params.
+                @if(property_exists($fields, 'user_id'))
+                Will only return <em>{{ Str::plural($resourceName) }}</em> belonging the currently authenticated user.
+
+
+                @endif
+            </td>
         </tr>
 
         @endforeach

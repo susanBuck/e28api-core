@@ -8,6 +8,7 @@ use Tests\TestCase;
 use App\Models\GeneratedModels\Product;
 use App\Models\GeneratedModels\Favorite;
 use App\Models\User;
+use Laravel\Sanctum\Sanctum;
 
 class RestrictedResourceTest extends TestCase
 {
@@ -92,6 +93,26 @@ class RestrictedResourceTest extends TestCase
     }
 
     /**
+     * @group focus
+     */
+    public function testNewFavoritesAreAutomaticallyAssociatedWithAuthenticatedUser()
+    {
+        $product = Product::factory()->create();
+        $user = User::factory()->create();
+        
+        Sanctum::actingAs($user);
+
+        $r = $this->json('POST', '/favorite', [
+            'product_id' => $product->id,
+        ]);
+
+        $favorite = Favorite::where('user_id', $user->id)->where('product_id', $product->id)->first();
+
+        $this->assertTrue($favorite);
+        $r->assertJsonPath('success', true);
+    }
+
+    /**
      *
      */
     public function testYouCantDeleteFavoriteAsNonOwner()
@@ -101,7 +122,7 @@ class RestrictedResourceTest extends TestCase
 
         $favorite = Favorite::factory()->create(['user_id' => $userB->id]);
        
-        $r = $this->actingAs($userA);
+        Sanctum::actingAs($userA);
 
         $r = $this->json('DELETE', '/favorite/'.$favorite->id);
 
