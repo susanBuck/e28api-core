@@ -15,7 +15,7 @@ class BuildApiCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'e28-api:setup';
+    protected $signature = 'e28-api:setup {--refreshOnly=false}';
 
     /**
      * The console command description.
@@ -41,6 +41,9 @@ class BuildApiCommand extends Command
      */
     public function handle()
     {
+        # If refreshOnly = true, we don't want to rebuild the entire API, just run fresh migrations/seeds
+        $refreshOnly = $this->option('refreshOnly') == "true" ? true : false;
+        
         $resourcePath = base_path('../resources.json');
         if (File::exists($resourcePath)) {
             $resourcesJson = File::get($resourcePath);
@@ -70,14 +73,18 @@ class BuildApiCommand extends Command
         }
 
         # Build the API
-        $action = new BuildApi($loadResources->resources, $loadSeeds->seeds);
-
-        # Report on resources that were created
-        $this->info('Resources created: ');
-        foreach ($action->results['resources'] as $resource) {
-            $this->info('* ' . $resource);
+        $action = new BuildApi($loadResources->resources, $loadSeeds->seeds, $refreshOnly);
+        
+        # If we're just doing a refresh, no resources were created so skip this step
+        if (!$refreshOnly) {
+            # Report on resources that were created
+            $this->info('Resources created: ');
+            foreach ($action->results['resources'] as $resource) {
+                $this->info('* ' . $resource);
+            }
+            $this->info('');
         }
-        $this->info('');
+        
         
         # Report on seeds that were run
         $this->info('Seeds run: ');

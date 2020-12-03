@@ -13,12 +13,10 @@ use App\Actions\LoadResources;
 
 class HomeController extends Controller
 {
-    public $resources;
-    
     /**
-     *
+     * GET /
      */
-    public function __construct()
+    public function index()
     {
         $resourcePath = base_path('../resources.json');
         if (File::exists($resourcePath)) {
@@ -28,23 +26,30 @@ class HomeController extends Controller
         }
         
         $loadResources = new LoadResources($resourcesJson);
-        $this->resources = $loadResources->resources;
-    }
-    
-    /**
-     * GET /
-     */
-    public function index()
-    {
+        $resources = $loadResources->resources;
+
         $loadDatabaseTables = new LoadDatabaseTables();
 
         return view('index')->with([
             'database' => $loadDatabaseTables->results,
-            'resources' => $this->resources,
+            'resources' => $resources,
             'allowedOrigins' => config('cors.allowed_origins'),
             'statefulDomains' => config('sanctum.stateful'),
             'sessionDomain' => config('session.domain'),
             'httpsCookie' => config('session.secure')
         ]);
+    }
+
+    /**
+     * GET /refresh
+     */
+    public function refresh()
+    {
+        Artisan::call('e28-api:setup --refreshOnly=true');
+
+        return response([
+            'message' => 'Tables were cleared and re-seeded.',
+            'success' => true
+        ], 200);
     }
 }

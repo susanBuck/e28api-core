@@ -67,12 +67,18 @@
             </tr>
         </thead>
         <tr>
+            <td>refresh</td>
+            <td><code>GET</code></code></td>
+            <td><code>/refresh</code></td>
+            <td>Clears any existing data for resources and re-runs seeds, giving application a “fresh start” for testing purposes.</em></td>
+        </tr>
+
+
+        <tr>
             <td>login</td>
             <td><code>POST</code></code></td>
             <td><code>/login</code></td>
             <td>Log in a user (expects params: <code>email</code>, <code>password</code>); includes a <em>Set-Cookie</em> HTTP response header if successful.</em></td>
-
-
         </tr>
         <tr>
             <td>auth</td>

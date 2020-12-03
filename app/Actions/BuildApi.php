@@ -21,33 +21,40 @@ class BuildApi
     /**
      *
      */
-    public function __construct($resources, $seeds)
+    public function __construct($resources, $seeds, $refreshOnly = false)
     {
-        $this->deleteExistingGeneratedFiles();
+        # If refreshOnly = true, we don't want to rebuild the entire API
+        # Instead, we want to skip down to just running fresh migrations and then seeding
+        if (!$refreshOnly) {
+            $this->deleteExistingGeneratedFiles();
 
-        # First pass through resources, we generate files
-        foreach ($resources as $resourceName => $fields) {
+            # First pass through resources, we generate files
+            foreach ($resources as $resourceName => $fields) {
 
-            # Set the current resource we're working on
-            # so the following actions apply to this resource
-            $this->setResource($resourceName, $fields);
+                # Set the current resource we're working on
+                # so the following actions apply to this resource
+                $this->setResource($resourceName, $fields);
 
-            $this->createMigration();
-            $this->createModel();
-            $this->createController();
-            $this->createRequest();
-            $this->appendRoutes();
+                $this->createMigration();
+                $this->createModel();
+                $this->createController();
+                $this->createRequest();
+                $this->appendRoutes();
 
-            # Track resources for outputting purposes
-            $this->results['resources'][] = $this->resourceName;
+                # Track resources for outputting purposes
+                $this->results['resources'][] = $this->resourceName;
+            }
+
+            # Routes are all built, so we write them
+            $this->writeRoutes();
         }
 
         # Migrations are generated, so now we run them all
-        Artisan::call('migrate:fresh --force');
-
-        # Routes are all built, so we write them
-        $this->writeRoutes();
-
+        # Note: Not using migrate:fresh here because it didn't work correctly when
+        # invoked as part of /tests/feature/RefreshTest.php
+        Artisan::call('migrate:rollback', ['--force' => true]);
+        Artisan::call('migrate', ['--force' => true]);
+        
         # Second pass through resources now that tables exist to seed data
         # Add a `user` resource so we can run user seeds
         $resources->user = new stdClass();
