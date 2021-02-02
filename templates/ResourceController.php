@@ -180,6 +180,8 @@ class ResourceController extends \App\Http\Controllers\Controller
         $query = DB::getQueryLog();
 
         return response([
+            'success' => true,
+            'errors' => [],
             'results' => $results
         ], 200); # 200 Ok
     }

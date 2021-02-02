@@ -16,7 +16,7 @@ class HomeController extends Controller
     /**
      * GET /
      */
-    public function index()
+    public function index(Request $request)
     {
         $resourcePath = base_path('../resources.json');
         if (File::exists($resourcePath)) {
@@ -35,8 +35,6 @@ class HomeController extends Controller
             'resources' => $resources,
             'allowedOrigins' => config('cors.allowed_origins'),
             'statefulDomains' => config('sanctum.stateful'),
-            'sessionDomain' => config('session.domain'),
-            'httpsCookie' => config('session.secure')
         ]);
     }
 

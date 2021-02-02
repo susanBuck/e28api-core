@@ -10,7 +10,7 @@ use App\Models\GeneratedModels\Product;
 use App\Models\GeneratedModels\Favorite;
 use App\Models\User;
 
-class Resourcetest extends TestCase
+class ResourceTest extends TestCase
 {
     use WithFaker;
     use RefreshDatabase;

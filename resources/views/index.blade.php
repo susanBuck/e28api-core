@@ -4,53 +4,16 @@
 
 <h1 data-test='api-heading'>API</h1>
 
-<section id='configs'>
-    <h2>Security Configs</h2>
 
-    <h3>Allowed origins</h3>
+<!--
+SESSION_COOKIE: {{ config('session.cookie') }}
+SESSION_DOMAIN: {{ config('session.domain') }}
+SESSION_SECURE_COOKIE: {{ config('session.secure') ? 'TRUE' : 'FALSE' }}
+CORS_ALLOWED_ORIGINS: @foreach(config('cors.allowed_origins') as $config) {{ $config }} @endforeach
 
-    <p>What URLs can make requests to this API:</p>
-    <ul>
-        @if($allowedOrigins[0] == '*')
-        <li><code>*</code> (Any URL)</li>
+SANCTUM_STATEFUL_DOMAINS: @foreach(config('sanctum.stateful') as $config) {{ $config }} @endforeach 
+-->
 
-        @else
-
-        @foreach($allowedOrigins as $origin)
-        <li><code>{{ $origin }}</code></li>
-        @endforeach
-
-        @endif
-    </ul>
-    <small>Configure via <em>CORS_ALLOWED_ORIGINS</em> in <em>/e28-api/core/.env</em></small>
-
-
-    <h3>Stateful domains</h3>
-    <p>What domains and/or subdomains will receive stateful API authentication cookies in response to succesful login requests:</p>
-    <ul>
-        @if($statefulDomains[0] == '')
-        <code>None specified</code>
-        @else
-        @foreach($statefulDomains as $domain)
-        <li><code>{{ $domain }}</code></li>
-        @endforeach
-        @endif
-    </ul>
-    <small>Configure via <em>SANCTUM_STATEFUL_DOMAINS</em> in <em>/e28-api/core/.env</em></small>
-
-
-    <h3>Session domain</h3>
-    <p>Authentication cookies will be valid under this root domain: <code>{{ $sessionDomain }}</code></p>
-
-    <small>Configure via <em>SESSION_DOMAIN</em> in <em>/e28-api/core/.env</em></small>
-
-
-    <h3>Session secure cookie</h3>
-    <p>Authentication cookies will only be sent back if the browser has a HTTPS connection: <code>{{ $httpsCookie ? 'True' : 'False' }}</code></p>
-
-    <small>Configure via <em>SESSION_SECURE_COOKIE</em> in <em>/e28-api/core/.env</em></small>
-
-</section>
 
 <section>
     <h2>Routes</h2>

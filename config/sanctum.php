@@ -11,8 +11,14 @@ return [
     | authentication cookies. Typically, these should include your local
     | and production domains which access your API via a frontend SPA.
     |
+    | What domains and/or subdomains will receive stateful API authentication cookies
+    | in response to succesful login requests
+    | + Separate multiple domains by a comma
+    | + Include a port if that's how the domain is accessed (e.g. localhost:8080)
+    | + Exclude http:// and https://
+
     */
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS')),
+    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', '*')),
     
     /*
     |--------------------------------------------------------------------------

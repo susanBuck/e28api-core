@@ -3,6 +3,44 @@
 use Illuminate\Support\Str;
 
 return [
+    /*
+    |--------------------------------------------------------------------------
+    | Session Cookie Name
+    |--------------------------------------------------------------------------
+    |
+    | Here you may change the name of the cookie used to identify a session
+    | instance by ID. The name specified here will get used every time a
+    | new session cookie is created by the framework for every driver.
+    |
+    */
+    'cookie' => env('SESSION_COOKIE', 'e28_api_session'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Session Cookie Domain
+    |--------------------------------------------------------------------------
+    |
+    | Here you may change the domain of the cookie used to identify a session
+    | in your application. This will determine which domains the cookie is
+    | available to in your application. A sensible default has been set.
+    |
+    | Authentication cookies will be valid under this root domain (and any of its subdomains)
+    | + Specify *one* domain
+    | + Exclude http:// and/or https://
+    */
+    'domain' => env('SESSION_DOMAIN', getRootDomain()),
+
+    /*
+    |--------------------------------------------------------------------------
+    | HTTPS Only Cookies
+    |--------------------------------------------------------------------------
+    |
+    | By setting this option to true, session cookies will only be sent back
+    | to the server if the browser has a HTTPS connection. This will keep
+    | the cookie from being sent to you if it can not be done securely.
+    |
+    */
+    'secure' => env('SESSION_SECURE_COOKIE', isSecure()),
 
     /*
     |--------------------------------------------------------------------------
@@ -117,22 +155,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Session Cookie Name
-    |--------------------------------------------------------------------------
-    |
-    | Here you may change the name of the cookie used to identify a session
-    | instance by ID. The name specified here will get used every time a
-    | new session cookie is created by the framework for every driver.
-    |
-    */
-
-    'cookie' => env(
-        'SESSION_COOKIE',
-        Str::slug(env('APP_NAME', 'laravel'), '_').'_session'
-    ),
-
-    /*
-    |--------------------------------------------------------------------------
     | Session Cookie Path
     |--------------------------------------------------------------------------
     |
@@ -144,32 +166,7 @@ return [
 
     'path' => '/',
 
-    /*
-    |--------------------------------------------------------------------------
-    | Session Cookie Domain
-    |--------------------------------------------------------------------------
-    |
-    | Here you may change the domain of the cookie used to identify a session
-    | in your application. This will determine which domains the cookie is
-    | available to in your application. A sensible default has been set.
-    |
-    */
-
-    'domain' => env('SESSION_DOMAIN', '.'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | HTTPS Only Cookies
-    |--------------------------------------------------------------------------
-    |
-    | By setting this option to true, session cookies will only be sent back
-    | to the server if the browser has a HTTPS connection. This will keep
-    | the cookie from being sent to you if it can not be done securely.
-    |
-    */
-
-    'secure' => env('SESSION_SECURE_COOKIE'),
-
+    
     /*
     |--------------------------------------------------------------------------
     | HTTP Access Only
