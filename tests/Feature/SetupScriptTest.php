@@ -43,6 +43,6 @@ class SetupScriptTest extends TestCase
     {
         $output = $this->runAndGetOutput("bash ../setup");
 
-        $this->assertTrue(Str::contains($output, "This script must be run from within the e28-api directory."));
+        $this->assertTrue(Str::contains($output, "This script must be run from within the e28api directory."));
     }
 }

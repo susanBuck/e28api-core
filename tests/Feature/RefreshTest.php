@@ -27,7 +27,7 @@ class RefreshTest extends TestCase
         # this just confirms that
         $this->assertTrue(Product::all()->count() == 0);
    
-        # Invoke the /refresh route we're testing
+        # Invoke the /refresh route we’re testing
         $r = $this->get('/refresh');
 
         # Confirm output

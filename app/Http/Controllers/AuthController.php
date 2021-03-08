@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -111,5 +112,39 @@ class AuthController extends Controller
             'success' => true,
             'authenticated' => false,
         ], 200);
+    }
+
+
+    
+    /**
+     * POST /login-as
+     */
+    public function loginAs(Request $request)
+    {
+        $user_id = $request->id;
+        
+        if (!Str::contains(getRootDomain(), '.loc')) {
+            return response([
+            'success' => false,
+            'errors' => ['This functionality is only accessible when run from a .loc domain'],
+        ], 200);
+        }
+
+        $user = User::find($user_id);
+
+        if (!$user) {
+            return response([
+            'success' => false,
+            'errors' => ['User ' . $user_id . ' not found'],
+        ], 200);
+        } else {
+            Auth::login($user, $remember = true);
+            return response([
+            'success' => true,
+            'errors' => null,
+            'user' => $user,
+        ], 200);
+            ;
+        }
     }
 }

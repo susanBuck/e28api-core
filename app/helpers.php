@@ -11,12 +11,12 @@ Argument 2 passed to Illuminate\Routing\UrlGenerator::__construct() must be an i
 
 function isSecure()
 {
-    $url = app()->runningInConsole() ? '' : url()->current();
+    $url = app()->runningInConsole() ? 'http://e28api.test.loc' : url()->current();
     return parse_url($url, PHP_URL_SCHEME) == 'https';
 }
 
 function getRootDomain()
 {
-    $url = app()->runningInConsole() ? '' : url()->current();
+    $url = app()->runningInConsole() ? 'http://e28api.test.loc' : url()->current();
     return Str::after(parse_url($url, PHP_URL_HOST), '.');
 }

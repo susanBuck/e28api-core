@@ -14,6 +14,25 @@ class UserTest extends TestCase
     use RefreshDatabase;
 
     /**
+     *
+     */
+    public function testLoginAs()
+    {
+        $user = User::factory()->create();
+
+        $r = $this->json('POST', '/login-as', [
+            'id' => $user->id,
+        ]);
+        
+        $r->assertStatus(200);
+        $r->assertJsonPath('success', true);
+        $r->assertJsonPath('user.name', $user->name);
+        $r->assertJsonPath('user.email', $user->email);
+    }
+
+
+
+    /**
     *
     */
     public function testSuccesfulRegistration()

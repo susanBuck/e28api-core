@@ -43,7 +43,7 @@ class HomeController extends Controller
      */
     public function refresh()
     {
-        Artisan::call('e28-api:setup --refreshOnly=true');
+        Artisan::call('e28api:setup --refreshOnly=true');
 
         return response([
             'message' => 'Tables were cleared and re-seeded.',

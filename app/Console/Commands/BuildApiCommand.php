@@ -15,7 +15,7 @@ class BuildApiCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'e28-api:setup {--refreshOnly=false}';
+    protected $signature = 'e28api:setup {--refreshOnly=false}';
 
     /**
      * The console command description.
