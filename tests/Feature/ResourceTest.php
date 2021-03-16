@@ -151,7 +151,7 @@ class ResourceTest extends TestCase
 
         $r = $this->json("PUT", '/product/'.$product->id, $product->toArray());
         $r->assertJsonPath('success', true);
-        $r->assertJsonPath('test', 'update-completed');
+        $r->assertJsonPath('test', 'product-updated');
     }
 
 

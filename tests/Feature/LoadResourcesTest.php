@@ -16,13 +16,37 @@ class LoadResourcesTest extends TestCase
     use WithFaker;
     use RefreshDatabase;
 
+    private $resourcesDir;
+
     /**
-     *
-     */
-    public function testLoadResources()
+    *
+    */
+    public function setUp() :void
     {
-        $resources = new LoadResources(File::get(base_path('../resources.json')));
-        
+        parent::setUp();
+
+        # Where we’ll write our test JSON resources files
+        $this->resourcesDir = base_path('storage/tests').'/';
+
+        # Clear out any of the test json files we wrote in previous tests
+        # (Do this in setUp instead of tearDown so we can investigate files after failed tests)
+        File::delete(File::allFiles($this->resourcesDir));
+    }
+
+    /**
+    * Helper function to write our test JSON resource files
+    */
+    private function writeJson($fileName, $content)
+    {
+        File::put($this->resourcesDir.$fileName.'.json', $content);
+    }
+
+    /**
+     * Test the default resource files that come with the app
+     */
+    public function testLoadDefaultResources()
+    {
+        $resources = new LoadResources();
         $this->assertTrue($resources->errors == []);
         $this->assertTrue($resources->resources->product !== null);
         $this->assertTrue($resources->resources->favorite !== null);
@@ -31,20 +55,44 @@ class LoadResourcesTest extends TestCase
     /**
      *
      */
+    public function testInvalidJson()
+    {
+        $invalidJson = '{
+            "permission_level": 0
+            "fields": {}
+        }';
+
+        $this->writeJson('product', $invalidJson);
+        
+        $resources = new LoadResources($this->resourcesDir);
+
+        $this->assertTrue($resources->errors[0] == "Resource file `product.json` is not valid JSON");
+    }
+
+    /**
+     *
+     */
     public function testInvalidResourceName()
     {
         $json = '{
-            "product1": {
+            "permission_level": 0,
+            "fields": {
                 "name": {
                     "type": "string",
-                    "validators": []
+                    "validators": [
+                        "required",
+                        "min:3",
+                        "max:100"
+                    ]
                 }
             }
         }';
 
-        $resources = new LoadResources($json);
+        $this->writeJson('product1', $json);
         
-        $this->assertTrue($resources->errors[0] == "Resource name `product1` is invalid; must only contain letters");
+        $resources = new LoadResources($this->resourcesDir);
+        
+        $this->assertTrue($resources->errors[0] == "Resource name `product1` (file `product1.json`) is invalid; must only contain letters");
     }
     
     /**
@@ -53,18 +101,23 @@ class LoadResourcesTest extends TestCase
     public function testMissingDataType()
     {
         $json = '{
-            "product": {
+            "permission_level": 0,
+            "fields": {
                 "name": {
                     "validators": [
-                        "required"
+                        "required",
+                        "min:3",
+                        "max:100"
                     ]
                 }
             }
         }';
 
-        $resources = new LoadResources($json);
+        $this->writeJson('product', $json);
 
-        $this->assertTrue($resources->errors[0] == "Resource `product`, field `name` missing *type*");
+        $resources = new LoadResources($this->resourcesDir);
+        
+        $this->assertTrue($resources->errors[0] == "Resource `product.json`, field `name` missing *type*");
     }
 
     /**
@@ -73,15 +126,19 @@ class LoadResourcesTest extends TestCase
     public function testMissingValidators()
     {
         $json = '{
-            "product": {
+            "permission_level": 0,
+            "fields": {
                 "name": {
                     "type": "string"
                 }
             }
         }';
 
-        $resources = new LoadResources($json);
-        $this->assertTrue(Str::contains($resources->errors[0], "Resource `product`, field `name` missing *validators* property."));
+        $this->writeJson('product', $json);
+
+        $resources = new LoadResources($this->resourcesDir);
+
+        $this->assertTrue(Str::contains($resources->errors[0], "Resource `product.json`, field `name` missing *validators* property."));
     }
 
     /**
@@ -90,18 +147,20 @@ class LoadResourcesTest extends TestCase
     public function testUnrecognizedValidator()
     {
         $json = '{
-            "product": {
+            "permission_level": 0,
+            "fields": {
                 "name": {
                     "type": "string",
-                    "validators": [
-                        "important"
-                    ]
+                    "validators": ["important"]
                 }
             }
         }';
 
-        $resources = new LoadResources($json);
-        $this->assertTrue($resources->errors[0] == "Resource `product`, field `name` is using an unrecognized validator: `important`");
+        $this->writeJson('product', $json);
+
+        $resources = new LoadResources($this->resourcesDir);
+
+        $this->assertTrue($resources->errors[0] == "Resource `product.json`, field `name` is using an unrecognized validator: `important`");
     }
 
     /**
@@ -110,17 +169,19 @@ class LoadResourcesTest extends TestCase
     public function testValidatorMissingValue()
     {
         $json = '{
-            "product": {
+            "permission_level": 0,
+            "fields": {
                 "name": {
                     "type": "string",
-                    "validators": [
-                        "min"
-                    ]
+                    "validators": ["min"]
                 }
             }
         }';
 
-        $resources = new LoadResources($json);
-        $this->assertTrue($resources->errors[0] == "Resource `product`, field `name` is using the validator `min` with no value. Expecting something like `min:5`.");
+        $this->writeJson('product', $json);
+
+        $resources = new LoadResources($this->resourcesDir);
+
+        $this->assertTrue($resources->errors[0] == "Resource `product.json`, field `name` is using the validator `min` with no value. Expecting something like `min:5`.");
     }
 }

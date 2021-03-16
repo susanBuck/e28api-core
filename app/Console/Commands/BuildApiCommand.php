@@ -41,19 +41,10 @@ class BuildApiCommand extends Command
      */
     public function handle()
     {
-        # If refreshOnly = true, we don't want to rebuild the entire API, just run fresh migrations/seeds
+        # If refreshOnly = true, we dont want to rebuild the entire API, just run fresh migrations/seeds
         $refreshOnly = $this->option('refreshOnly') == "true" ? true : false;
-        
-        $resourcePath = base_path('../resources.json');
-        if (File::exists($resourcePath)) {
-            $resourcesJson = File::get($resourcePath);
-        } else {
-            $this->error("Resource file not found at " . $resourcePath);
-            return;
-        }
 
-        $loadResources = new LoadResources($resourcesJson);
-
+        $loadResources = new LoadResources();
         if (count($loadResources->errors) > 0) {
             $this->error('API Build failed when loading resources:');
             foreach ($loadResources->errors as $error) {
@@ -61,7 +52,7 @@ class BuildApiCommand extends Command
             }
             return;
         }
-       
+
         # Gather and validate seed JSON files
         $loadSeeds = new LoadSeeds($loadResources->resources);
         if (count($loadSeeds->errors) > 0) {

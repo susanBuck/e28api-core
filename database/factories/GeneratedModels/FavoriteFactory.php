@@ -4,7 +4,7 @@
 NOTE: This Factory exists only for feature tests
 It is not actually generated -
 it only exists in a directory with the name `GeneratedModels`
-because there's a corelation betwen model and factory paths
+because there’s a correlation betwen model and factory paths
 
 e.g. :
 Model at /app/Models/GeneratedModels/Product.php

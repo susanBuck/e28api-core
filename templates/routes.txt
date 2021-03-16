@@ -1,6 +1,6 @@
-Route::# middleware #get('/# route #', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'index']);
-Route::# middleware #get('/# route #/query', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'query']);
-Route::# middleware #post('/# route #', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'store']);
-Route::# middleware #get('/# route #/{id}', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'show']);
-Route::# middleware #put('/# route #/{id}', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'update']);
-Route::# middleware #delete('/# route #/{id}', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'destroy']);
+Route::get('/# route #', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'index']);
+Route::get('/# route #/query', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'query']);
+Route::get('/# route #/{id}', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'show']);
+Route::post('/# route #', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'store']);
+Route::put('/# route #/{id}', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'update']);
+Route::delete('/# route #/{id}', [App\Http\Controllers\GeneratedControllers\ResourceController::class, 'destroy']);

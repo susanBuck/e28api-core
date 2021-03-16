@@ -19,55 +19,71 @@ class LoadResources
     /**
      *
      */
-    public function __construct($resourcesJson)
+    public function __construct($resourcesDirectory = null)
     {
-        # Initialize resources as an empty object
-        $this->resources = new stdClass();
-
-        # Load JSON from file
-        $resources = json_decode($resourcesJson);
-        if (!$resources) {
-            $this->errors[] = "resources.json does not contain valid JSON";
-            return;
+        if (is_null($resourcesDirectory)) {
+            $resourcesDirectory = base_path('../resources/');
         }
 
-        foreach ($resources as $resourceName => $fields) {
+        $this->resources = new stdClass();
+
+        $resourceFiles = File::allFiles($resourcesDirectory);
+
+        foreach ($resourceFiles as $resourceFile) {
             $resourceErrors = [];
-
-            if (!ctype_alpha($resourceName)) {
-                $resourceErrors[] = "Resource name `$resourceName` is invalid; must only contain letters";
-            }
-
-            foreach ($fields as $field => $value) {
-                if (!property_exists($value, 'type')) {
-                    $resourceErrors[] = "Resource `$resourceName`, field `$field` missing *type*";
+            
+            $resource = json_decode(File::get($resourceFile));
+            $pathinfo = pathinfo($resourceFile);
+            $fileNameWithExtension = $pathinfo['basename'];
+            $expectedResourceName = $pathinfo['filename'];
+            
+            if (is_null($resource)) {
+                $resourceErrors[] = "Resource file `$fileNameWithExtension` is not valid JSON";
+            } else {
+                if (!ctype_alpha($expectedResourceName)) {
+                    $resourceErrors[] = "Resource name `$expectedResourceName` (file `$fileNameWithExtension`) is invalid; must only contain letters";
                 }
 
-                if (!property_exists($value, 'validators')) {
-                    $resourceErrors[] = "Resource `$resourceName`, field `$field` missing *validators* property. If this field does not require validation, set `validators` to an empty array []";
+                if (!property_exists($resource, 'permission_level')) {
+                    $resourceErrors[] = "Resource file `$fileNameWithExtension` must have a property called `permission_level`";
+                }
+
+                if (!property_exists($resource, 'fields')) {
+                    $resourceErrors[] = "Resource file `$fileNameWithExtension` must have a property called `fields`";
                 } else {
-                    foreach ($value->validators as $validator) {
-                        $argument = null;
-                        if (strstr($validator, ':')) {
-                            $validator = substr($validator, 0, strpos($validator, ':'));
-                            $argument = substr($validator, strpos($validator, ':'));
+                    foreach ($resource->fields as $fieldName => $field) {
+                        if (!property_exists($field, 'type')) {
+                            $resourceErrors[] = "Resource `$fileNameWithExtension`, field `$fieldName` missing *type*";
                         }
                         
-                        if (!in_array($validator, $this->validators)) {
-                            $resourceErrors[] = "Resource `$resourceName`, field `$field` is using an unrecognized validator: `$validator`";
-                        }
+                        if (!property_exists($field, 'validators')) {
+                            $resourceErrors[] = "Resource `$fileNameWithExtension`, field `$fieldName` missing *validators* property. If this field does not require validation, set `validators` to an empty array []";
+                        } else {
+                            foreach ($field->validators as $validator) {
+                                $argument = null;
+                                if (strstr($validator, ':')) {
+                                    $validator = substr($validator, 0, strpos($validator, ':'));
+                                    $argument = substr($validator, strpos($validator, ':'));
+                                }
+                            
+                                if (!in_array($validator, $this->validators)) {
+                                    $resourceErrors[] = "Resource `$fileNameWithExtension`, field `$fieldName` is using an unrecognized validator: `$validator`";
+                                }
 
-                        if (in_array($validator, $this->validatorsWithArguments) && $argument == null) {
-                            $resourceErrors[] = "Resource `$resourceName`, field `$field` is using the validator `$validator` with no value. Expecting something like `$validator:5`.";
+                                if (in_array($validator, $this->validatorsWithArguments) && $argument == null) {
+                                    $resourceErrors[] = "Resource `$fileNameWithExtension`, field `$fieldName` is using the validator `$validator` with no value. Expecting something like `$validator:5`.";
+                                }
+                            }
                         }
                     }
                 }
             }
-            
+
+            # Finish
             if ($resourceErrors) {
                 $this->errors = array_merge($this->errors, $resourceErrors);
             } else {
-                $this->resources->$resourceName = $fields;
+                $this->resources->$expectedResourceName = $resource;
             }
         }
     }

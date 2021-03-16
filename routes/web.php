@@ -9,5 +9,9 @@ Route::get('/refresh', [HomeController::class, 'refresh']);
 Route::post('/login-as', [AuthController::class, 'loginAs']);
 
 Route::get('/login-required', function () {
-    return 'Access denied - Login required.';
-})->name('login-requred');
+    return response()->json([
+        'success' => false,
+        'errors' => ['Access denied - Login required.'],
+        'test' => 'access-denied-login-required'
+    ]);
+})->name('login-required');

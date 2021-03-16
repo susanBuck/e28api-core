@@ -5,6 +5,8 @@ namespace App\Http\Controllers\GeneratedControllers;
 use App\Models\GeneratedModels\Resource;
 
 use Validator;
+use Route;
+use Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\GeneratedRequests\ResourceRequest;
@@ -12,6 +14,34 @@ use App\Http\Requests\GeneratedRequests\ResourceRequest;
 class ResourceController extends \App\Http\Controllers\Controller
 {
     private $fields = [];
+
+    private $denied = [
+            'success' => false,
+            'errors' => ['access denied'],
+            'test' => 'access-denied'
+    ];
+
+    // /**
+    //  *
+    //  */
+    // public function __construct(Request $request)
+    // {
+    //     if (config('permissions.resource') >= 3 && !$request->user) {
+    //         return response($this->denied, 200);
+    //     }
+
+    //     if (in_array($action, ['store', 'update', 'detroy'])) {
+    //         if (config('permissions.resource') >= 1 && !$request->user) {
+    //             return response($this->denied, 200);
+    //         }
+    //     }
+
+    //     if (in_array($action, ['store', 'update', 'detroy'])) {
+    //         if (config('permissions.resource') == 2 && !$request->user) {
+    //             return response($this->denied, 200);
+    //         }
+    //     }
+    // }
 
     /**
      * GET /resource
@@ -21,15 +51,22 @@ class ResourceController extends \App\Http\Controllers\Controller
         $resource = new Resource();
         $query = $resource->query();
 
-        # Limit query to only resources beloning to the currently logged in user
-        if ($resource->userRestricted) {
+        if (config('permissions.resource') >= 3 && !$request->user()) {
+            return response($this->denied, 200);
+        }
+
+        # At permission level 5, resource is full private so only return rows for owner
+        if (config('permissions.resource') == 5) {
             $query = $query->where('user_id', $request->user()->id);
         }
+
+        $results = $query->get();
 
         return response([
             'success' => true,
             'errors' => null,
-            'resource' => $query->get(),
+            'resource' => $results,
+            'count' => $results->count()
         ], 200);
     }
 
@@ -48,18 +85,57 @@ class ResourceController extends \App\Http\Controllers\Controller
             ], 200);
         }
 
-        if ($resource->userRestricted and $resource->user_id != $request->user()->id) {
-            return response([
-                'success' => false,
-                'errors' => ['Data access denied'],
-                'test' => 'data-access-denied'
-            ], 200);
+        if (config('permissions.resource') >= 3 && !$request->user()) {
+            return response($this->denied, 200);
         }
-        
+
+        # At permission level 5, resource is full private so only return rows for owner
+        if (config('permissions.resource') == 5 && $resource->user_id != $request->user()->id) {
+            return response($this->denied, 200);
+        }
+
         return response([
             'success' => true,
             'errors' => null,
             'resource' => $resource->toArray()
+        ], 200);
+    }
+
+
+    /**
+    * GET /resource/query?key=value
+    */
+    public function query(Request $request)
+    {
+        DB::enableQueryLog();
+
+        $queries = $request->all();
+
+        $resource = new Resource();
+
+        $query = $resource->query();
+
+        if (config('permissions.resource') >= 3 && !$request->user()) {
+            return response($this->denied, 200);
+        }
+        
+        # At permission_level 5, resource is full private so user can only query for the resources they own
+        if (config('permissions.resource') == 5) {
+            $query = $query->where('user_id', $request->user()->id);
+        }
+
+        foreach ($queries as $key => $value) {
+            $query = $query->where($key, $value);
+        }
+
+        $results = $query->get()->toArray();
+
+        $query = DB::getQueryLog();
+
+        return response([
+            'success' => true,
+            'errors' => [],
+            'resource' => $results
         ], 200);
     }
 
@@ -73,8 +149,13 @@ class ResourceController extends \App\Http\Controllers\Controller
         foreach ($this->fields as $fieldName => $rule) {
             $resource->$fieldName = $request->$fieldName;
         }
-        
-        if ($resource->userRestricted) {
+
+        if (config('permissions.resource') >= 1 && !($request->user())) {
+            return response($this->denied, 200);
+        }
+
+        # At permission_level 5, resource is full private so any new resources has to belong to logged in user
+        if (config('permissions.resource') == 5) {
             $resource->user_id = $request->user()->id;
         }
         
@@ -103,12 +184,15 @@ class ResourceController extends \App\Http\Controllers\Controller
             ], 200);
         }
 
-        if ($resource->userRestricted and $resource->user_id != $request->user()->id) {
-            return response([
-                'success' => false,
-                'errors' => ['Data access denied'],
-                'test' => 'data-access-denied'
-            ], 200);
+        if (config('permissions.resource') >= 1 && !$request->user()) {
+            return response($this->denied, 200);
+        }
+
+        # 2 - Resource is readable by all, but only owners can alter
+        # 4 - Resource is only readable after login; only owner can alter
+        # 5 - Resource is only readable/alterable by owner
+        if (in_array(config('permissions.resource'), [2,4,5]) and $resource->user_id != $request->user()->id) {
+            return response($this->denied, 200);
         }
 
         $resource->delete();
@@ -116,6 +200,7 @@ class ResourceController extends \App\Http\Controllers\Controller
         return response([
             'success' => true,
             'errors' => null,
+            'test' => 'resource-deleted'
         ], 200);
     }
 
@@ -134,6 +219,17 @@ class ResourceController extends \App\Http\Controllers\Controller
             ], 200);
         }
 
+        if (config('permissions.resource') >= 1 && !$request->user()) {
+            return response($this->denied, 200);
+        }
+
+        # 2 - Resource is readable by all, but only owners can alter
+        # 4 - Resource is only readable after login; only owner can alter
+        # 5 - Resource is only readable/alterable by owner
+        if (in_array(config('permissions.resource'), [2,4,5]) and $resource->user_id != $request->user()->id) {
+            return response($this->denied, 200);
+        }
+
         # Executing Form Request validation manually so we can do the check above
         # to make sure the resource exists before validating
         # otherwise, it throws an error when checking unique fields
@@ -148,41 +244,9 @@ class ResourceController extends \App\Http\Controllers\Controller
         return response([
             'success' => true,
             'errors' => null,
-            'test' => 'update-completed',
+            'test' => 'resource-updated',
             'message' => 'Updated resource ' . $id,
             'resource' => $resource->toArray()
         ], 200);
-    }
-
-    /**
-    * GET /resource/query?key=value
-    */
-    public function query(Request $request)
-    {
-        DB::enableQueryLog();
-
-        $queries = $request->all();
-
-        $resource = new Resource();
-
-        $query = $resource->query();
-        
-        if ($resource->userRestricted) {
-            $query = $query->where('user_id', $request->user()->id);
-        }
-        
-        foreach ($queries as $key => $value) {
-            $query = $query->where($key, $value);
-        }
-
-        $results = $query->get()->toArray();
-
-        $query = DB::getQueryLog();
-
-        return response([
-            'success' => true,
-            'errors' => [],
-            'results' => $results
-        ], 200); # 200 Ok
     }
 }

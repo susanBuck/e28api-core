@@ -15,8 +15,10 @@ class BuildApi
     private $errors;
     
     private $routes;
+    private $permissions = '';
     private $resourceName;
     private $fields;
+    private $permission_level;
     
     /**
      *
@@ -29,17 +31,18 @@ class BuildApi
             $this->deleteExistingGeneratedFiles();
 
             # First pass through resources, we generate files
-            foreach ($resources as $resourceName => $fields) {
-
-                # Set the current resource we're working on
+            foreach ($resources as $resourceName => $thisResource) {
+               
+                # Set the current resource we’re working on
                 # so the following actions apply to this resource
-                $this->setResource($resourceName, $fields);
+                $this->setResource($resourceName, $thisResource->fields, $thisResource->permission_level);
 
                 $this->createMigration();
                 $this->createModel();
                 $this->createController();
                 $this->createRequest();
                 $this->appendRoutes();
+                $this->appendPermissions();
 
                 # Track resources for outputting purposes
                 $this->results['resources'][] = $this->resourceName;
@@ -47,6 +50,7 @@ class BuildApi
 
             # Routes are all built, so we write them
             $this->writeRoutes();
+            $this->writePermissions();
         }
 
         # Migrations are generated, so now we run them all
@@ -58,8 +62,11 @@ class BuildApi
         # Second pass through resources now that tables exist to seed data
         # Add a `user` resource so we can run user seeds
         $resources->user = new stdClass();
-        foreach ($resources as $resourceName => $fields) {
-            $this->setResource($resourceName, $fields);
+        $resources->user->fields = null;
+        $resources->user->permission_level = null;
+
+        foreach ($resources as $resourceName => $thisResource) {
+            $this->setResource($resourceName, $thisResource->fields, $thisResource->permission_level);
             $this->seedData($seeds);
         }
     }
@@ -67,12 +74,13 @@ class BuildApi
     /**
      *
      */
-    private function setResource($resourceName, $fields)
+    private function setResource($resourceName, $fields, $permission_level)
     {
         $this->resourceName = $resourceName;
         $this->resourceNameStudly = Str::studly($resourceName);
         $this->resourceNameLowerPlural = Str::lower(Str::plural($resourceName));
         $this->fields = $fields;
+        $this->permission_level = $permission_level;
     }
 
     /**
@@ -152,16 +160,9 @@ class BuildApi
     private function createModel()
     {
         $template = File::get(base_path('templates/Resource.php'));
+
         $template = str_replace('Resource', $this->resourceNameStudly, $template);
-
-        if (isset($this->fields->user_id)) {
-            $template = str_replace('# properties #', 'public $userRestricted = true;', $template);
-        } else {
-            $template = str_replace('# properties #', 'public $userRestricted = false;', $template);
-        }
-        
         $template = str_replace('# table name #', $this->resourceNameLowerPlural, $template);
-
 
         File::put(app_path('Models/GeneratedModels/' . $this->resourceNameStudly . '.php'), $template);
     }
@@ -174,14 +175,23 @@ class BuildApi
         $routes = File::get(base_path('templates/routes.txt'));
         $routes = str_replace('Resource', $this->resourceNameStudly, $routes);
         $routes = str_replace('# route #', $this->resourceName, $routes);
-
-        if (isset($this->fields->user_id)) {
-            $routes = str_replace('# middleware #', 'middleware("auth:sanctum")->', $routes);
-        } else {
-            $routes = str_replace('# middleware #', '', $routes);
-        }
-
         $this->routes .= $routes;
+    }
+
+    /**
+     *
+     */
+    private function appendPermissions()
+    {
+        $this->permissions .= "'" . $this->resourceName . "' => " . $this->permission_level . ",";
+    }
+
+    /**
+     *
+     */
+    private function writePermissions()
+    {
+        File::put(base_path('config/permissions.php'), "<?php \nreturn [" . $this->permissions. "\n];");
     }
 
     /**
@@ -275,7 +285,6 @@ class BuildApi
         $template = File::get(base_path('templates/migration.php'));
         $template = str_replace('Resource', $this->resourceNameStudly, $template);
         $template = str_replace('# table name #', $this->resourceNameLowerPlural, $template);
-
 
         $schema = '';
 

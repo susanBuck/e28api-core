@@ -32,7 +32,20 @@ class SetupScriptTest extends TestCase
     {
         $output = $this->runAndGetOutput();
         
-        $this->assertTrue(Str::contains($output, "Resources created:* product* favoriteSeeds run:* product (10 rows added)* favorite (2 rows added)* user (2 rows added)"));
+        $strings = [
+            'Resources created:',
+            '* favorite',
+            '* product',
+            'Seeds run:',
+            '* favorite (2 rows added)',
+            '* product (10 rows added)',
+            '* user (2 rows added)'
+        ];
+
+        foreach ($strings as $string) {
+            $this->assertTrue(Str::contains($output, $string));
+        }
+
         $this->assertNotTrue(Str::contains($output, 'error'));
     }
 
