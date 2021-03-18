@@ -1,6 +1,6 @@
 <?php
 
-# /Users/Susan/Sites/hes/e28-api/core/tests/Feature/DashboardTest.php
+# /Users/Susan/Sites/hes/e28api/core/tests/Feature/DashboardTest.php
 
 namespace Tests\Feature;
 

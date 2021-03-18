@@ -18,19 +18,22 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-        $resourcePath = base_path('../resources.json');
-        if (File::exists($resourcePath)) {
-            $resourcesJson = File::get($resourcePath);
-        } else {
-            dd("Resource file not found at " . $resourcePath);
-        }
-        
-        $loadResources = new LoadResources($resourcesJson);
+        $loadResources = new LoadResources();
         $resources = $loadResources->resources;
 
         $loadDatabaseTables = new LoadDatabaseTables();
 
+        $permission_levels = [
+            'Fully public: Resource is readable and alterable by all',
+            'Resource is readable by all, but only users can alter',
+            'Resource is readable by all, but only owners can alter',
+            'Resource is only readable after login; users can alter',
+            'Resource is only readable after login; only owner can alter',
+            'Fully private: Resource is only readable/alterable by owner'
+        ];
+
         return view('index')->with([
+            'permission_levels' => $permission_levels,
             'database' => $loadDatabaseTables->results,
             'resources' => $resources,
             'allowedOrigins' => config('cors.allowed_origins'),

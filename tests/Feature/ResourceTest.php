@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use Config;
+
 use App\Models\GeneratedModels\Product;
 use App\Models\GeneratedModels\Favorite;
 use App\Models\User;
@@ -14,6 +16,14 @@ class ResourceTest extends TestCase
 {
     use WithFaker;
     use RefreshDatabase;
+
+
+    public function setUp() :void
+    {
+        parent::setup();
+        Config::set('permissions.product', 0);
+        Config::set('permissions.favorite', 0);
+    }
 
     /**
      *
