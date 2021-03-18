@@ -20,17 +20,13 @@ class UserTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $r = $this->json('POST', '/login-as', [
-            'id' => $user->id,
-        ]);
+        $r = $this->json('GET', '/login-as/'.$user->id);
         
         $r->assertStatus(200);
         $r->assertJsonPath('success', true);
         $r->assertJsonPath('user.name', $user->name);
         $r->assertJsonPath('user.email', $user->email);
     }
-
-
 
     /**
     *

@@ -115,12 +115,10 @@ class AuthController extends Controller
     }
 
     /**
-     * POST /login-as
+     * GET /login-as/{user_id}
      */
-    public function loginAs(Request $request)
+    public function loginAs(Request $request, $user_id)
     {
-        $user_id = $request->id;
-        
         if (!Str::contains(getRootDomain(), '.loc')) {
             return response([
             'success' => false,

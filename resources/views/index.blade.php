@@ -9,15 +9,13 @@ SESSION_COOKIE: {{ config('session.cookie') }}
 SESSION_DOMAIN: {{ config('session.domain') }}
 SESSION_SECURE_COOKIE: {{ config('session.secure') ? 'TRUE' : 'FALSE' }}
 CORS_ALLOWED_ORIGINS: @foreach(config('cors.allowed_origins') as $config) {{ $config }} @endforeach
-
 SANCTUM_STATEFUL_DOMAINS: @foreach(config('sanctum.stateful') as $config) {{ $config }} @endforeach 
 -->
 
 <section>
     <h2>Routes</h2>
 
-
-    <h3>defaults</h3>
+    <h3>Authorization</h3>
     <table class='table table-light table-striped table-bordered table-sm'>
         <thead class='thead-light'>
             <tr>
@@ -27,13 +25,6 @@ SANCTUM_STATEFUL_DOMAINS: @foreach(config('sanctum.stateful') as $config) {{ $co
                 <th>Usage & Params</th>
             </tr>
         </thead>
-        <tr>
-            <td>refresh</td>
-            <td><code>GET</code></code></td>
-            <td><code>/refresh</code></td>
-            <td>Clears any existing data for resources and re-runs seeds, giving application a “fresh start” for testing purposes.</em></td>
-        </tr>
-
 
         <tr>
             <td>login</td>
@@ -61,13 +52,43 @@ SANCTUM_STATEFUL_DOMAINS: @foreach(config('sanctum.stateful') as $config) {{ $co
         </tr>
     </table>
 
-    @foreach($resources as $resourceName => $resource)
-    <h3>resource: {{ $resourceName }}</h3>
-    <p>
-        Permission level:
-        <em>{{ $resource->permission_level }}
 
-            {{ $permission_levels[$resource->permission_level] }}</em>
+    <h3>Testing</h3>
+    <table class='table table-light table-striped table-bordered table-sm'>
+        <thead class='thead-light'>
+            <tr>
+                <th>Name</th>
+                <th>HTTP Method</th>
+                <th>URL</th>
+                <th>Usage & Params</th>
+            </tr>
+        </thead>
+
+        <tr>
+            <td>refresh</td>
+            <td><code>GET</code></code></td>
+            <td><code>/refresh</code></td>
+            <td>Clears any existing data for resources and re-runs seeds, giving application a “fresh start” for testing purposes.</em></td>
+        </tr>
+
+        <tr>
+            <td>login-as</td>
+            <td><code>POST</code></code></td>
+            <td><code>/login-as/{user_Id}</code></td>
+            <td>Log in a user by id. Utility for testing purposes, e.g. <code>cy.visit('/login-as/' + user.id);</code>. Only works for requests coming from a .loc domain.</td>
+        </tr>
+
+    </table>
+
+    @foreach($resources as $resourceName => $resource)
+    <h3>Resource: <code>{{ $resourceName }}</code></h3>
+    <p>
+
+        <div class='permission-level'>
+            Permission level:
+            {{ $resource->permission_level }}
+            <em>({{ $permission_levels[$resource->permission_level] }})</em>
+        </div>
     </p>
 
     <table class='table table-light table-striped table-bordered table-sm'>

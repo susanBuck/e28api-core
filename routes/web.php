@@ -6,7 +6,7 @@ use App\Http\Controllers\AuthController;
 
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/refresh', [HomeController::class, 'refresh']);
-Route::post('/login-as', [AuthController::class, 'loginAs']);
+Route::get('/login-as/{user_id}', [AuthController::class, 'loginAs']);
 
 Route::get('/login-required', function () {
     return response()->json([
