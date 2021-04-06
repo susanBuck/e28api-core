@@ -74,7 +74,7 @@ SANCTUM_STATEFUL_DOMAINS: @foreach(config('sanctum.stateful') as $config) {{ $co
         <tr>
             <td>login-as</td>
             <td><code>POST</code></code></td>
-            <td><code>/login-as/{user_Id}</code></td>
+            <td><code>/login-as/{user_id}</code></td>
             <td>Log in a user by id. Utility for testing purposes, e.g. <code>cy.visit('/login-as/' + user.id);</code>. Only works for requests coming from a .loc domain.</td>
         </tr>
 
