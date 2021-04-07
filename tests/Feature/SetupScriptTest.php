@@ -1,5 +1,7 @@
 <?php
 
+# /Users/Susan/Sites/hes/e28api/core/tests/Feature/SetupScriptTest.php
+
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -59,13 +61,13 @@ class SetupScriptTest extends TestCase
         $this->assertTrue(Str::contains($output, "This script must be run from within the e28api directory."));
     }
 
-    /**
-     *
-     */
-    public function testUpdate()
-    {
-        $output = $this->runAndGetOutput("bash ../setup update");
+    // /**
+    //  *
+    //  */
+    // public function testUpdate()
+    // {
+    //     $output = $this->runAndGetOutput("bash ../setup update");
         
-        $this->assertTrue(Str::contains($output, "Update complete ✓"));
-    }
+    //     $this->assertTrue(Str::contains($output, "Update complete ✓"));
+    // }
 }

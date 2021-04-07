@@ -21,28 +21,6 @@ class ResourceController extends \App\Http\Controllers\Controller
             'test' => 'access-denied'
     ];
 
-    // /**
-    //  *
-    //  */
-    // public function __construct(Request $request)
-    // {
-    //     if (config('permissions.resource') >= 3 && !$request->user) {
-    //         return response($this->denied, 200);
-    //     }
-
-    //     if (in_array($action, ['store', 'update', 'detroy'])) {
-    //         if (config('permissions.resource') >= 1 && !$request->user) {
-    //             return response($this->denied, 200);
-    //         }
-    //     }
-
-    //     if (in_array($action, ['store', 'update', 'detroy'])) {
-    //         if (config('permissions.resource') == 2 && !$request->user) {
-    //             return response($this->denied, 200);
-    //         }
-    //     }
-    // }
-
     /**
      * GET /resource
      */
@@ -166,7 +144,7 @@ class ResourceController extends \App\Http\Controllers\Controller
             'errors' => null,
             'test' => 'resource-created',
             'resource' => $resource
-            ], 201); # 201 Resource created
+            ], 200);
     }
 
     /**
